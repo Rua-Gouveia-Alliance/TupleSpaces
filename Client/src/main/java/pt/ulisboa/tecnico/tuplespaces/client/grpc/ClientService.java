@@ -49,7 +49,7 @@ public class ClientService {
     return stub.getTupleSpacesState(request);
   }
 
-  protected void finalize() {
+  public void exit() {
     channel.shutdownNow();
   }
 }
