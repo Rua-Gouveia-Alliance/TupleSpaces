@@ -1,5 +1,12 @@
 package pt.ulisboa.tecnico.tuplespaces.server;
 
+import io.grpc.BindableService;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import pt.ulisboa.tecnico.tuplespaces.server.grpc.TupleSpacesImpl;
+
+import java.io.IOException;
+
 public class ServerMain {
 
   private static boolean checkArguments(String[] args) {
@@ -23,7 +30,21 @@ public class ServerMain {
     return (d < 0 || d > 65535); // check for invalid port numbers
   }
 
-  public static void main(String[] args) {
+  private static void startServer(int port) throws IOException, InterruptedException {
+    final BindableService impl = new TupleSpacesImpl();
+
+    // create new server
+    Server server = ServerBuilder.forPort(port).addService(impl).build();
+
+    // start the server
+    server.start();
+    System.err.println("Server started");
+
+    // wait until server is terminated
+    server.awaitTermination();
+  }
+
+  public static void main(String[] args) throws IOException, InterruptedException {
 
     // receive and print arguments
     System.out.printf("Received %d arguments%n", args.length);
@@ -45,6 +66,7 @@ public class ServerMain {
     final String port = args[0];
     final String qualifier = args[1];
 
+    startServer(Integer.parseInt(port));
   }
 }
 
