@@ -23,7 +23,19 @@ public class ClientMain {
         // get the host and the port
         final String host = args[0];
         final String port = args[1];
-		final String target = host + ":" + port;
+        final String target = host + ":" + port;
+
+        // check for valid port number
+        try {
+            int port_number = Integer.parseInt(port);
+            if (port_number < 0 || port_number > 65535) {
+                System.err.println("Invalid port number!");
+                return;
+            }
+        } catch (Exception e) {
+            System.err.println("Invalid port number!");
+            return;
+        }
 
         CommandProcessor parser = new CommandProcessor(new ClientService(target));
         parser.parseInput();
