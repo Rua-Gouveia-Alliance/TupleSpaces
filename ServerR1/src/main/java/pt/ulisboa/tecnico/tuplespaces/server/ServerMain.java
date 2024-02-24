@@ -39,7 +39,7 @@ public class ServerMain {
 
     if (!checkArguments(args)) {
       System.err.println("Invalid arguments.");
-      System.exit(0);
+      return;
     }
 
     final String port = args[0];
