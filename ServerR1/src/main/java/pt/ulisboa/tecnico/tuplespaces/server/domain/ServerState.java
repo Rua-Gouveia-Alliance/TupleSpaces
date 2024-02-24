@@ -9,7 +9,6 @@ public class ServerState {
 
   public ServerState() {
     this.tuples = new ArrayList<String>();
-
   }
 
   public void put(String tuple) {
@@ -30,12 +29,12 @@ public class ServerState {
   }
 
   public String take(String pattern) {
-    // TODO
-    return null;
+    String tuple = getMatchingTuple(pattern);
+    tuples.remove(tuple);
+    return tuple;
   }
 
   public List<String> getTupleSpacesState() {
-    // TODO
-    return null;
+    return tuples;
   }
 }
