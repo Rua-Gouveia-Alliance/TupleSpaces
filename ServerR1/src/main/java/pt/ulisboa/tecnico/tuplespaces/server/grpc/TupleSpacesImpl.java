@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.tuplespaces.server.grpc;
 
-import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
@@ -9,13 +8,19 @@ import pt.ulisboa.tecnico.tuplespaces.server.domain.ServerState;
 public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
 
     /* Server state implementation
-    * TODO: Is this the right place to instantiate the ServerState? */
+     * TODO: Is this the right place to instantiate the ServerState? */
     private ServerState state = new ServerState();
 
     @Override
     public void put(TupleSpacesCentralized.PutRequest request,
                     StreamObserver<TupleSpacesCentralized.PutResponse> responseObserver) {
-        // TODO
+        String newTuple = request.getNewTuple();
+        state.put(newTuple);
+
+        // create and send response
+        TupleSpacesCentralized.PutResponse response = TupleSpacesCentralized.PutResponse.getDefaultInstance();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override
