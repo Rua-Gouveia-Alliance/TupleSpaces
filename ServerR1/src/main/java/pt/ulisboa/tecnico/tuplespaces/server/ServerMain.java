@@ -3,15 +3,11 @@ package pt.ulisboa.tecnico.tuplespaces.server;
 public class ServerMain {
 
   private static boolean checkArguments(String[] args) {
-    if (checkPort(args[0]) && checkQualifier(args[1])) {
-      return true;
-    }
-    return false;
+    return checkPort(args[0]) && checkQualifier(args[1]);
   }
 
   private static boolean checkQualifier(String s) {
-    if (s != "A" && s != "B" && s != "C") return false;
-    return true;
+    return s != "A" && s != "B" && s != "C";
   }
 
   private static boolean checkPort(String s) {
