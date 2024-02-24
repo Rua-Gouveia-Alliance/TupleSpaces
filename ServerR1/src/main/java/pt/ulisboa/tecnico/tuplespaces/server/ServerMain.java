@@ -20,10 +20,7 @@ public class ServerMain {
     } catch (NumberFormatException e) {
       return false;
     }
-    if (d < 0 || d > 65535) {   // check for invalid port numbers
-      return false;
-    }
-    return true;
+    return (d < 0 || d > 65535); // check for invalid port numbers
   }
 
   public static void main(String[] args) {
