@@ -47,7 +47,7 @@ public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
     public void take(TupleSpacesCentralized.TakeRequest request,
                      StreamObserver<TupleSpacesCentralized.TakeResponse> responseObserver) {
         String pattern = request.getSearchPattern();
-        String tuple = state.read(pattern);
+        String tuple = state.take(pattern);
 
         if (tuple == null) {
             // TODO: send exception or wait??
