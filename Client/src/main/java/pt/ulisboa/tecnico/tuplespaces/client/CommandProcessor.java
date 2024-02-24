@@ -1,5 +1,8 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized.ReadResponse;
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized.TakeResponse;
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized.getTupleSpacesStateResponse;
 import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
 
 import java.util.Scanner;
@@ -25,147 +28,152 @@ public class CommandProcessor {
 
     void parseInput() {
 
-        Scanner scanner = new Scanner(System.in);
-        boolean exit = false;
+        try (Scanner scanner = new Scanner(System.in)) {
+            boolean exit = false;
 
-        while (!exit) {
-            System.out.print("> ");
-            String line = scanner.nextLine().trim();
-            String[] split = line.split(SPACE);
-             switch (split[0]) {
-                case PUT:
-                    this.put(split);
-                    break;
+            while (!exit) {
+                System.out.print("> ");
+                String line = scanner.nextLine().trim();
+                String[] split = line.split(SPACE);
+                switch (split[0]) {
+                    case PUT:
+                        this.put(split);
+                        break;
 
-                case READ:
-                    this.read(split);
-                    break;
+                    case READ:
+                        this.read(split);
+                        break;
 
-                case TAKE:
-                    this.take(split);
-                    break;
+                    case TAKE:
+                        this.take(split);
+                        break;
 
-                case GET_TUPLE_SPACES_STATE:
-                    this.getTupleSpacesState(split);
-                    break;
+                    case GET_TUPLE_SPACES_STATE:
+                        this.getTupleSpacesState(split);
+                        break;
 
-                case SLEEP:
-                    this.sleep(split);
-                    break;
+                    case SLEEP:
+                        this.sleep(split);
+                        break;
 
-                case SET_DELAY:
-                    this.setdelay(split);
-                    break;
+                    case SET_DELAY:
+                        this.setdelay(split);
+                        break;
 
-                case EXIT:
-                    exit = true;
-                    break;
+                    case EXIT:
+                        clientService.exit();
+                        exit = true;
+                        break;
 
-                default:
-                    this.printUsage();
-                    break;
-             }
+                    default:
+                        this.printUsage();
+                        break;
+                }
+            }
         }
     }
 
-    private void put(String[] split){
+    private void put(String[] split) {
 
         // check if input is valid
         if (!this.inputIsValid(split)) {
             this.printUsage();
             return;
         }
-        
+
         // get the tuple
         String tuple = split[1];
 
         // put the tuple
-        System.out.println("TODO: implement put command");
-
+        clientService.put(tuple);
+        System.out.println("Put tuple: " + tuple);
     }
 
-    private void read(String[] split){
+    private void read(String[] split) {
         // check if input is valid
         if (!this.inputIsValid(split)) {
             this.printUsage();
             return;
         }
-        
+
         // get the tuple
-        String tuple = split[1];
+        String pattern = split[1];
 
         // read the tuple
-        System.out.println("TODO: implement read command");
+        ReadResponse response = clientService.read(pattern);
+        System.out.println("Read tuple:" + response.getResult());
     }
 
-
-    private void take(String[] split){
-         // check if input is valid
+    private void take(String[] split) {
+        // check if input is valid
         if (!this.inputIsValid(split)) {
             this.printUsage();
             return;
         }
-        
-        // get the tuple
-        String tuple = split[1];
+
+        String pattern = split[1];
 
         // take the tuple
-        System.out.println("TODO: implement take command");
+        TakeResponse response = clientService.take(pattern);
+        System.out.println("Took tuple:" + response.getResult());
     }
 
-    private void getTupleSpacesState(String[] split){
+    private void getTupleSpacesState(String[] split) {
 
-        if (split.length != 2){
+        if (split.length != 2) {
             this.printUsage();
             return;
         }
         String qualifier = split[1];
 
         // get the tuple spaces state
-        System.out.println("TODO: implement getTupleSpacesState command");
+        getTupleSpacesStateResponse response = clientService.getTupleSpacesState();
+        for (String tuple : response.getTupleList()) {
+            System.out.println(tuple);
+        }
 
     }
 
     private void sleep(String[] split) {
-      if (split.length != 2){
-        this.printUsage();
-        return;
-      }
-      Integer time;
+        if (split.length != 2) {
+            this.printUsage();
+            return;
+        }
+        Integer time;
 
-      // checks if input String can be parsed as an Integer
-      try {
-         time = Integer.parseInt(split[1]);
-      } catch (NumberFormatException e) {
-        this.printUsage();
-        return;
-      }
+        // checks if input String can be parsed as an Integer
+        try {
+            time = Integer.parseInt(split[1]);
+        } catch (NumberFormatException e) {
+            this.printUsage();
+            return;
+        }
 
-      try {
-        Thread.sleep(time*1000);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
+        try {
+            Thread.sleep(time * 1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setdelay(String[] split) {
-      if (split.length != 3){
-        this.printUsage();
-        return;
-      }
-      String qualifier = split[1];
-      Integer time;
+        if (split.length != 3) {
+            this.printUsage();
+            return;
+        }
+        String qualifier = split[1];
+        Integer time;
 
-      // checks if input String can be parsed as an Integer
-      try {
-        time = Integer.parseInt(split[2]);
-      } catch (NumberFormatException e) {
-        this.printUsage();
-        return;
-      }
+        // checks if input String can be parsed as an Integer
+        try {
+            time = Integer.parseInt(split[2]);
+        } catch (NumberFormatException e) {
+            this.printUsage();
+            return;
+        }
 
-      // register delay <time> for when calling server <qualifier>
-      System.out.println("TODO: implement setdelay command (only needed in phases 2+3)");
+        // register delay <time> for when calling server <qualifier>
+        System.out.println("TODO: implement setdelay command (only needed in phases 2+3)");
     }
 
     private void printUsage() {
@@ -179,19 +187,17 @@ public class CommandProcessor {
                 "- exit\n");
     }
 
-    private boolean inputIsValid(String[] input){
-        if (input.length < 2 
-            ||
-            !input[1].substring(0,1).equals(BGN_TUPLE) 
-            || 
-            !input[1].endsWith(END_TUPLE)
-            || 
-            input.length > 2
-            ) {
+    private boolean inputIsValid(String[] input) {
+        if (input.length < 2
+                ||
+                !input[1].substring(0, 1).equals(BGN_TUPLE)
+                ||
+                !input[1].endsWith(END_TUPLE)
+                ||
+                input.length > 2) {
             this.printUsage();
             return false;
-        }
-        else {
+        } else {
             return true;
         }
     }
