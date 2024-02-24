@@ -20,10 +20,7 @@ public class ServerMain {
     } catch (NumberFormatException e) {
       return false;
     }
-    if (d < 0 || d > 65535) {   // check for invalid port numbers
-      return false;
-    }
-    return true;
+    return (d < 0 || d > 65535); // check for invalid port numbers
   }
 
   public static void main(String[] args) {
@@ -42,7 +39,7 @@ public class ServerMain {
 
     if (!checkArguments(args)) {
       System.err.println("Invalid arguments.");
-      System.exit(0);
+      return;
     }
 
     final String port = args[0];
