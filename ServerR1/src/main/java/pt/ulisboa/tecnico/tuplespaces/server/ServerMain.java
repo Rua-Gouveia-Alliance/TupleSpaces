@@ -27,7 +27,7 @@ public class ServerMain {
 		} catch (NumberFormatException e) {
 			return false;
 		}
-		return (d < 0 || d > 65535); // check for invalid port numbers
+		return (d >= 1024 && d <= 65535); // check for invalid port numbers
 	}
 
 	private static void startServer(int port) throws IOException, InterruptedException {
