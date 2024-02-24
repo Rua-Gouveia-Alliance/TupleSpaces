@@ -5,6 +5,8 @@ import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralize
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
 import pt.ulisboa.tecnico.tuplespaces.server.domain.ServerState;
 
+import java.util.List;
+
 public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
 
     /* Server state implementation
@@ -62,6 +64,12 @@ public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
     @Override
     public void getTupleSpacesState(TupleSpacesCentralized.getTupleSpacesStateRequest request,
                                     StreamObserver<TupleSpacesCentralized.getTupleSpacesStateResponse> responseObserver) {
-        // TODO
+        List<String> tuples = state.getTupleSpacesState();
+
+        // create and send response
+        TupleSpacesCentralized.getTupleSpacesStateResponse response = TupleSpacesCentralized.getTupleSpacesStateResponse
+                .newBuilder().addAllTuple(tuples).build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 }
