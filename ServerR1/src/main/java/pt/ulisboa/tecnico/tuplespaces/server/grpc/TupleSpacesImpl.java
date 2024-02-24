@@ -44,7 +44,19 @@ public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
     @Override
     public void take(TupleSpacesCentralized.TakeRequest request,
                      StreamObserver<TupleSpacesCentralized.TakeResponse> responseObserver) {
-        // TODO
+        String pattern = request.getSearchPattern();
+        String tuple = state.read(pattern);
+
+        if (tuple == null) {
+            // TODO: send exception or wait??
+            return;
+        }
+
+        // create and send response
+        TupleSpacesCentralized.TakeResponse response = TupleSpacesCentralized.TakeResponse.newBuilder().setResult(
+                tuple).build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override
