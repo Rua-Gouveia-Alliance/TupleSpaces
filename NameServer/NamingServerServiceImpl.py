@@ -1,28 +1,30 @@
 import sys
-import NamingServer
-import ServerEntry
-import ServiceEntry
+from NamingServer import NamingServer
+from ServerEntry import ServerEntry
+from ServiceEntry import ServiceEntry
+
 sys.path.insert(1, '../contract/target/generated-sources/protobuf/python')
-import NamingServer_pb2 as pb2
-import NamingServer_pb2_grpc as pb2_grpc
+import NameServer_pb2 as pb2
+import NameServer_pb2_grpc as pb2_grpc
 
-class NamingServerServiceImpl(pb2_grpc.NamingServerServiceImpl):
 
-    def __init__(self,  *args, **kwargs):
-        # Instatiating a new naming server
+class NamingServerServiceImpl(pb2_grpc.NameServerServicer):
+
+    def __init__(self, *args, **kwargs):
+        # Instantiating a new naming server
         self.namingServer = NamingServer()
-    
+
     def register(self, request, context):
-        # TODO "uma exceção com a descrição Not possible to register the server quando não for possível registar o serviço"
+        # TODO exceção com a descrição "Not possible to register the server" quando não for possível registar o serviço
         server = ServerEntry(request.addr, request.qualifier)
-        
+
         # Service already exists, simply add a new provider
-        if self.namingServer.isRegistered(request.service):
-            self.namingServer.getService(request.service).addProvider(server)
-        else: # Service does not yet exist
+        if self.namingServer.is_registered(request.service):
+            self.namingServer.get_service(request.service).add_provider(server)
+        else:  # Service does not yet exist
             service = ServiceEntry()
-            service.addProvider(server)
-            self.namingServer.addService(service)
+            service.add_provider(server)
+            self.namingServer.add_service(service)
 
         response = pb2.RegisterResponse()
         return response
