@@ -17,14 +17,7 @@ class NamingServerServiceImpl(pb2_grpc.NameServerServicer):
     def register(self, request, context):
         # TODO exceção com a descrição "Not possible to register the server" quando não for possível registar o serviço
         server = ServerEntry(request.addr, request.qualifier)
-
-        # Service already exists, simply add a new provider
-        if self.namingServer.is_registered(request.service):
-            self.namingServer.get_service(request.service).add_provider(server)
-        else:  # Service does not yet exist
-            service = ServiceEntry()
-            service.add_provider(server)
-            self.namingServer.add_service(service)
+        self.namingServer.add_server_to_service(request.service, server)
 
         response = pb2.RegisterResponse()
         return response
