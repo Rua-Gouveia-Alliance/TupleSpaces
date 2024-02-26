@@ -1,11 +1,11 @@
 from ServerEntry import ServerEntry
 
 class ServiceEntry:
-    def __init__(self, name: str, providers: list[ServerEntry]):
+    def __init__(self, name: str) -> None:
         # This service's name
         self.name = name
         # Servers that provide this service
-        self.providers = providers
+        self.providers = []
     
-    def addProvider(self, provider: ServerEntry):
+    def addProvider(self, provider: ServerEntry) -> None:
         self.providers.append(provider)
