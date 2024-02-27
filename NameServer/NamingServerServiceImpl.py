@@ -15,7 +15,7 @@ class NamingServerServiceImpl(pb2_grpc.NameServerServicer):
         self.namingServer = NamingServer()
 
     def register(self, request, context):
-        # TODO exceção com a descrição "Not possible to register the server" quando não for possível registar o serviço
+        # TODO exceção com a descrição "Not possible to register the server" quando não for possível registar o servidor
         server = ServerEntry(request.addr, request.qualifier)
         self.namingServer.add_server_to_service(request.service, server)
 
@@ -23,7 +23,19 @@ class NamingServerServiceImpl(pb2_grpc.NameServerServicer):
         return response
 
     def lookup(self, request, context):
-        pass
+        requestedServers = []
+        service = self.namingServer.get_service(request.service_name)
+        if service != None:     # TODO quando service não existe, retornar lista vazia
+            requestedServers = service.lookup(request.qualifier)
+
+        response = pb2.LookupResponse(requestedServers)
+        return response
+
 
     def delete(self, request, context):
-        pass
+        # TODO exceção com a descrição "Not possible to remove the server" quando não for possível remover o servidor
+        server = ServerEntry(request.addr, request.qualifier)
+        self.namingServer.add_server_to_service(request.service, server)
+
+        response = pb2.RegisterResponse()
+        return response
