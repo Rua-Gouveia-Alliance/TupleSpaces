@@ -16,10 +16,15 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
         self.nameServer = NameServer()
 
     def register(self, request, context):
-        server = ServerEntry(request.addr, request.qualifier)
-        self.nameServer.add_server_to_service(request.service, server)
-        response = pb2.RegisterResponse()
-        return response
+        try:
+            server = ServerEntry(request.addr, request.qualifier)
+            self.nameServer.add_server_to_service(request.service, server)
+        except:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("Not possible to register the server")
+        #TODO perguntar ao professor se faz sentido falhar na criação quando um qualifier não é dado
+
+        return pb2.RegisterResponse()
 
     def lookup(self, request, context):
         if self.nameServer.is_registered(request.service):

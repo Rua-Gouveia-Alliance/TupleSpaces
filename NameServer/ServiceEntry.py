@@ -17,7 +17,7 @@ class ServiceEntry:
         self.providers[provider.qualifier] = provider
 
     def lookup(self, qualifier: str) -> list: 
-        if qualifier == None:
+        if qualifier == "":
             return list(map(lambda x: x.addr, self.providers))
         if qualifier in self.providers:
             return [self.providers[qualifier].addr]
