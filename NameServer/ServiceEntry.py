@@ -9,26 +9,24 @@ class ServiceEntry:
         # This service's name
         self.name = name
         # Servers that provide this service
-        self.providers = []
+ # TODO perguntar ao professor se podemos optar por utilizar um dicionário em vez de uma lista como é referido no guião
+        self.providers = {}
 
     def add_provider(self, provider: ServerEntry) -> None:
-        self.providers.append(provider)
+        # If the provider's identifier already exists it's entry is simply replaced
+        self.providers[provider.qualifier] = provider
 
     def lookup(self, qualifier: str) -> list: 
         if qualifier == None:
-            return list(map(lambda x: x.target, self.providers))
+            return list(map(lambda x: x.addr, self.providers))
+        if qualifier in self.providers:
+            return [self.providers[qualifier].addr]
+        return []
 
-        requestedServers = []
-        for provider in self.providers:
-            if provider.qualifier == qualifier:
-                requestedServers.append(provider.target)
-
-        return requestedServers
-
-    def remove_provider(self, target_address: str) -> str:
+    def remove_provider(self, addr: str) -> str:
         for i in range(len(self.providers)):
-            if self.providers[i].target == target_address:
-                self.providers.pop(i)
-                return target_address
-        return None     # TODO Quando o servidor não está associado ao serviço, deve-se retornar o quê?
+            if self.providers[i].addr == addr:
+                return self.providers.pop(i).addr
+        # Provider not found
+        return None
             
