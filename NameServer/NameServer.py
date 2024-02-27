@@ -7,6 +7,7 @@ class NameServer:
     Keeps all the information the server needs, with a map associating service names
     to their respective ServiceEntry objects
     """
+
     def __init__(self) -> None:
         # Dictionary that maps service names to entries
         self.services = {}
@@ -29,4 +30,5 @@ class NameServer:
         if not self.is_registered(service_name):
             raise Exception("Service does not exist")
         if self.get_service(service_name).remove_provider(server_addr) == None:
-            raise Exception("Service no provided by this server")
+            # Raise exception if remove_provider fails
+            raise Exception("Service not provided by this server")

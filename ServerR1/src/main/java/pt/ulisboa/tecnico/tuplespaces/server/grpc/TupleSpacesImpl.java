@@ -15,8 +15,7 @@ import java.util.List;
 
 public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
 
-    /* Server state implementation
-     * TODO: Is this the right place to instantiate the ServerState? */
+    // Server state implementation
     private ServerState state = new ServerState();
 
     @Override
@@ -37,11 +36,6 @@ public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
         String pattern = request.getSearchPattern();
         String tuple = state.read(pattern);
 
-        if (tuple == null) {
-            // TODO: send exception or wait??
-            return;
-        }
-
         // create and send response
         TupleSpacesCentralized.ReadResponse response = TupleSpacesCentralized.ReadResponse.newBuilder().setResult(
                 tuple).build();
@@ -54,11 +48,6 @@ public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
                      StreamObserver<TupleSpacesCentralized.TakeResponse> responseObserver) {
         String pattern = request.getSearchPattern();
         String tuple = state.take(pattern);
-
-        if (tuple == null) {
-            // TODO: send exception or wait??
-            return;
-        }
 
         // create and send response
         TupleSpacesCentralized.TakeResponse response = TupleSpacesCentralized.TakeResponse.newBuilder().setResult(

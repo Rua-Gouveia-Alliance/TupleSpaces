@@ -10,13 +10,8 @@ import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingStub;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
-public class ClientService {
 
-  /*
-   * TODO: The gRPC client-side logic should be here.
-   * This should include a method that builds a channel and stub,
-   * as well as individual methods for each remote operation of this service.
-   */
+public class ClientService {
 
   private final ManagedChannel channel;
   private final TupleSpacesBlockingStub stub;
