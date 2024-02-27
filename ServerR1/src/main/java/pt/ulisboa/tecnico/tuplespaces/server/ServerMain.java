@@ -1,20 +1,23 @@
 package pt.ulisboa.tecnico.tuplespaces.server;
 
 import io.grpc.BindableService;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import pt.ulisboa.tecnico.tuplespaces.server.grpc.TupleSpacesImpl;
+
+import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingStub;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
 
 import java.io.IOException;
 
 public class ServerMain {
 
 	private static boolean checkArguments(String[] args) {
-		return checkPort(args[0]) && checkQualifier(args[1]);
-	}
-
-	private static boolean checkQualifier(String s) {
-		return s != "A" && s != "B" && s != "C";
+		return checkPort(args[0]);
 	}
 
 	private static boolean checkPort(String s) {
@@ -27,11 +30,27 @@ public class ServerMain {
 		} catch (NumberFormatException e) {
 			return false;
 		}
-		return (d >= 1024 && d <= 65535); // check for invalid port numbers
+		return (d >= 1024 && d <= 65535); // check for invalid port numbers TODO can port be 5001?
 	}
 
-	private static void startServer(int port) throws IOException, InterruptedException {
+	private static void startServer(int port, String qualifier) throws IOException, InterruptedException {
 		final BindableService impl = new TupleSpacesImpl();
+
+		final String host = "localhost";
+        final String dnsPort = "5001";
+		final String serviceName = "TupleSpaces";
+		final ManagedChannel channel;
+		final NameServerBlockingStub stub;
+
+		String addr = host + ":" + dnsPort;
+
+		channel = ManagedChannelBuilder.forTarget(addr).usePlaintext().build();
+    	stub = NameServerGrpc.newBlockingStub(channel);
+
+		addr = host + ":" + port;
+
+		RegisterRequest request = RegisterRequest.newBuilder().setService(serviceName).setAddr(addr).setQualifier(qualifier).build();
+    	RegisterResponse res = stub.register(request);
 
 		// create new server
 		Server server = ServerBuilder.forPort(port).addService(impl).build();
@@ -44,18 +63,19 @@ public class ServerMain {
 		server.awaitTermination();
 	}
 
+	// TODO handle server shutdown
 	public static void main(String[] args) throws IOException, InterruptedException {
 
 		// receive and print arguments
 		System.out.printf("Received %d arguments%n", args.length);
 		for (int i = 0; i < args.length; i++) {
-		System.out.printf("arg[%d] = %s%n", i, args[i]);
+			System.out.printf("arg[%d] = %s%n", i, args[i]);
 		}
 
 		if (args.length != 2) {
-		System.err.println("Wrong number of arguments.");
-		System.err.println("Usage: mvn exec:java -Dexec.args=<port> <qualifier>");
-		return;
+			System.err.println("Wrong number of arguments.");
+			System.err.println("Usage: mvn exec:java -Dexec.args=<port> <qualifier>");
+			return;
 		}
 
 		if (!checkArguments(args)) {
@@ -66,7 +86,7 @@ public class ServerMain {
 		final String port = args[0];
 		final String qualifier = args[1];
 
-		startServer(Integer.parseInt(port));
+		startServer(Integer.parseInt(port), qualifier);
 	}
 }
 

@@ -23,7 +23,7 @@ class NameServer:
     def add_server_to_service(self, service_name: str, server: ServerEntry) -> None:
         if not self.is_registered(service_name):
             self.add_service(service_name)
-        self.get_service(service_name).add_provider(server)
+        self.get_service(service_name).add_provider(server)        
     
     def remove_server_from_service(self, service_name: str, server_addr: str) -> None:
         if not self.is_registered(service_name):

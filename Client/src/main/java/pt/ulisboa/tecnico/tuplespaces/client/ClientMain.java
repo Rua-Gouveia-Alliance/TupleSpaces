@@ -1,6 +1,9 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.LookupResponse;
 import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
+
 
 public class ClientMain {
     public static void main(String[] args) {
@@ -13,18 +16,19 @@ public class ClientMain {
             System.out.printf("arg[%d] = %s%n", i, args[i]);
         }
 
-        // check arguments
-        if (args.length != 3) {
-            System.err.println("Argument(s) missing!");
-            System.err.println("Usage: mvn exec:java -Dexec.args=<host> <port>");
-            return;
-        }
+        // to connect to the DNS, target = localhost:5001
+        final String host = "localhost";
+        final String port = "5001";
+        String target = host + ":" + port;
+        final String qualifier = args[0];
 
-        // get the host and the port
-        final String host = args[0];
-        final String port = args[1];
-        final String target = host + ":" + port;
+        // receive TupleService server connection from DNS
+        ClientService dnsService = new ClientService(target);
 
+        // A que servidor é que o cliente se deve ligar
+        dnsService.lookup("TupleSpaces", qualifier);
+        target = dnsService.lookup("TupleSpaces", qualifier).getServers(0);
+    
         // check for valid port number
         try {
             int port_number = Integer.parseInt(port);

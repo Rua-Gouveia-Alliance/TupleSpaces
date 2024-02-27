@@ -1,9 +1,15 @@
 package pt.ulisboa.tecnico.tuplespaces.server.grpc;
 
+import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesBlockingStub;
 import pt.ulisboa.tecnico.tuplespaces.server.domain.ServerState;
+
+import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
 
 import java.util.List;
 
