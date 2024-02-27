@@ -14,19 +14,21 @@ class ServiceEntry:
     def add_provider(self, provider: ServerEntry) -> None:
         self.providers.append(provider)
 
-    def lookup(self, qualifier) -> list: 
+    def lookup(self, qualifier: str) -> list: 
         if qualifier == None:
-            return self.providers
+            return list(map(lambda x: x.target, self.providers))
+
         requestedServers = []
         for provider in self.providers:
             if provider.qualifier == qualifier:
-                requestedServers.append(provider.toString())
+                requestedServers.append(provider.target)
+
         return requestedServers
 
-    def remove_provider(self, target_address):
-        for provider in self.providers:
-            if provider.target == target_address:
-                self.providers.remove(target_address)
+    def remove_provider(self, target_address: str) -> str:
+        for i in range(len(self.providers)):
+            if self.providers[i].target == target_address:
+                self.providers.pop(i)
                 return target_address
         return None     # TODO Quando o servidor não está associado ao serviço, deve-se retornar o quê?
             

@@ -23,10 +23,11 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
         return response
 
     def lookup(self, request, context):
-        requestedServers = []
-        service = self.nameServer.get_service(request.service_name)
-        if service != None:     # TODO quando service não existe, retornar lista vazia
+        if self.nameServer.is_registered(request.service):     # TODO quando service não existe, retornar lista vazia
+            service = self.nameServer.get_service(request.service)
             requestedServers = service.lookup(request.qualifier)
+        else:
+            requestedServers = []
 
         response = pb2.LookupResponse(requestedServers)
         return response
