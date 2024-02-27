@@ -14,7 +14,7 @@ public class ServerMain {
 	}
 
 	private static boolean checkQualifier(String s) {
-		return s != "A" && s != "B" && s != "C";
+		return s.equals("A") || s.equals("B") || s.equals("C");
 	}
 
 	private static boolean checkPort(String s) {
