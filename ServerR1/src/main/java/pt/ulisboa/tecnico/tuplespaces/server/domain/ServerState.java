@@ -11,11 +11,12 @@ public class ServerState {
         this.tuples = new ArrayList<String>();
     }
 
-    public void put(String tuple) {
+    public synchronized void put(String tuple) {
         tuples.add(tuple);
+        notifyAll();
     }
 
-    private String getMatchingTuple(String pattern) {
+    private synchronized String getMatchingTuple(String pattern) {
         for (String tuple : this.tuples) {
             if (tuple.matches(pattern)) {
                 return tuple;
@@ -24,17 +25,25 @@ public class ServerState {
         return null;
     }
 
-    public String read(String pattern) {
-        return getMatchingTuple(pattern);
+    public synchronized String read(String pattern) {
+        String tuple;
+        while ((tuple = getMatchingTuple(pattern)) == null) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return tuple;
     }
 
-    public String take(String pattern) {
-        String tuple = getMatchingTuple(pattern);
+    public synchronized String take(String pattern) {
+        String tuple = read(pattern);
         tuples.remove(tuple);
         return tuple;
     }
 
-    public List<String> getTupleSpacesState() {
+    public synchronized List<String> getTupleSpacesState() {
         return tuples;
     }
 }
