@@ -33,7 +33,8 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
         else:
             requestedServers = []
 
-        response = pb2.LookupResponse(requestedServers)
+        response = pb2.LookupResponse()
+        response.servers[:] = requestedServers
         return response
 
     def delete(self, request, context):

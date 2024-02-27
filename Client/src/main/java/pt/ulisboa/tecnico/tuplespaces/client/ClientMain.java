@@ -3,6 +3,10 @@ package pt.ulisboa.tecnico.tuplespaces.client;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.LookupResponse;
 import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingStub;
 
 
 public class ClientMain {
@@ -23,11 +27,13 @@ public class ClientMain {
         final String qualifier = args[0];
 
         // receive TupleService server connection from DNS
-        ClientService dnsService = new ClientService(target);
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
+        NameServerBlockingStub stub = NameServerGrpc.newBlockingStub(channel);
 
-        // A que servidor é que o cliente se deve ligar
-        dnsService.lookup("TupleSpaces", qualifier);
-        target = dnsService.lookup("TupleSpaces", qualifier).getServers(0);
+        // finding the TupleSpace's server address
+        LookupRequest request = LookupRequest.newBuilder().setService("TupleSpaces").setQualifier(qualifier).build();
+        LookupResponse response = stub.lookup(request);
+        target = response.getServers(0);
     
         // check for valid port number
         try {
