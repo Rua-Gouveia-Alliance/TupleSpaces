@@ -2,7 +2,7 @@ from ServiceEntry import ServiceEntry
 from ServerEntry import ServerEntry
 
 
-class NamingServer:
+class NameServer:
     """
     Keeps all the information the server needs, with a map associating service names
     to their respective ServiceEntry objects
