@@ -8,13 +8,8 @@ import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.Tuple
 
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
-public class ClientService {
 
-  /*
-   * TODO: The gRPC client-side logic should be here.
-   * This should include a method that builds a channel and stub,
-   * as well as individual methods for each remote operation of this service.
-   */
+public class ClientService {
 
   private final ManagedChannel channel;
   private final TupleSpacesBlockingStub stub;
