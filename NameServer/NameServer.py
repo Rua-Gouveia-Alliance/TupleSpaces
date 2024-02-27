@@ -24,3 +24,9 @@ class NameServer:
         if not self.is_registered(service_name):
             self.add_service(service_name)
         self.get_service(service_name).add_provider(server)
+    
+    def remove_server_from_service(self, service_name: str, server_addr: str) -> None:
+        if not self.is_registered(service_name):
+            raise Exception("Service does not exist")
+        if self.get_service(service_name).remove_provider(server_addr) == None:
+            raise Exception("Service no provided by this server")

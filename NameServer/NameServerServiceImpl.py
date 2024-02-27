@@ -34,9 +34,10 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
 
 
     def delete(self, request, context):
-        # TODO exceção com a descrição "Not possible to remove the server" quando não for possível remover o servidor
-        server = ServerEntry(request.addr, request.qualifier)
-        self.nameServer.add_server_to_service(request.service, server)
-
-        response = pb2.RegisterResponse()
-        return response
+        try:
+            self.remove_server_from_service(request.service, request.server)
+            response = pb2.DeleteResponse()
+            return response
+        except:
+            pass # TODO exceção com a descrição "Not possible to remove the server" quando não for possível remover o servidor
+        
