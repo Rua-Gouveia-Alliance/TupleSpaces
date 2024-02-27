@@ -33,24 +33,24 @@ public class ServerMain {
 		return (d >= 1024 && d <= 65535); // check for invalid port numbers TODO can port be 5001?
 	}
 
+	private static void registerServer(int port, String qualifier) {
+		String host = "localhost";
+		String dnsPort = "5001";
+		String serviceName = "TupleSpaces";
+		ManagedChannel channel;
+		NameServerBlockingStub stub;
+		String dnsAddr = host + ":" + dnsPort;
+		String serverAddr = host + ":" + port;
+
+		channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
+		stub = NameServerGrpc.newBlockingStub(channel);
+
+		RegisterRequest request = RegisterRequest.newBuilder().setService(serviceName).setAddr(serverAddr).setQualifier(qualifier).build();
+		RegisterResponse response = stub.register(request);
+	}
+
 	private static void startServer(int port, String qualifier) throws IOException, InterruptedException {
 		final BindableService impl = new TupleSpacesImpl();
-
-		final String host = "localhost";
-        final String dnsPort = "5001";
-		final String serviceName = "TupleSpaces";
-		final ManagedChannel channel;
-		final NameServerBlockingStub stub;
-
-		String addr = host + ":" + dnsPort;
-
-		channel = ManagedChannelBuilder.forTarget(addr).usePlaintext().build();
-    	stub = NameServerGrpc.newBlockingStub(channel);
-
-		addr = host + ":" + port;
-
-		RegisterRequest request = RegisterRequest.newBuilder().setService(serviceName).setAddr(addr).setQualifier(qualifier).build();
-    	RegisterResponse res = stub.register(request);
 
 		// create new server
 		Server server = ServerBuilder.forPort(port).addService(impl).build();
@@ -58,6 +58,9 @@ public class ServerMain {
 		// start the server
 		server.start();
 		System.err.println("Server started");
+
+		// register in DNS server
+		registerServer(port, qualifier);
 
 		// wait until server is terminated
 		server.awaitTermination();
