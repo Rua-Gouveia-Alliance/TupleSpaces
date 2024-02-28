@@ -42,11 +42,17 @@ public class ServerMain {
 		String dnsAddr = host + ":" + dnsPort;
 		String serverAddr = host + ":" + port;
 
-		channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
-		stub = NameServerGrpc.newBlockingStub(channel);
+		try {
+			channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
+			stub = NameServerGrpc.newBlockingStub(channel);
 
-		RegisterRequest request = RegisterRequest.newBuilder().setService(serviceName).setAddr(serverAddr).setQualifier(qualifier).build();
-		RegisterResponse response = stub.register(request);
+			RegisterRequest request = RegisterRequest.newBuilder().setService(serviceName).setAddr(serverAddr).setQualifier(qualifier).build();
+			RegisterResponse response = stub.register(request);
+		} catch (Exception e) {		//TODO especificar exception?
+			System.err.println("Problem trying to register server");
+			System.exit(0);
+		}
+		
 	}
 
 	private static void startServer(int port, String qualifier) throws IOException, InterruptedException {
@@ -56,8 +62,15 @@ public class ServerMain {
 		Server server = ServerBuilder.forPort(port).addService(impl).build();
 
 		// start the server
-		server.start();
-		System.err.println("Server started");
+		try {
+			server.start();
+		} catch (IOException e) {
+			System.err.println(e);
+			System.err.println("Port already in use!");		//TODO should we keep this?
+			System.exit(0);
+		}
+		
+		System.out.println("Server started");
 
 		// register in DNS server
 		registerServer(port, qualifier);

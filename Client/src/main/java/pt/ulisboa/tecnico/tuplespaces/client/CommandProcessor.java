@@ -63,6 +63,7 @@ public class CommandProcessor {
                     case EXIT:
                         clientService.exit();
                         exit = true;
+                        System.exit(0);     //TODO o que é que é suposto o exit fazer?
                         break;
 
                     default:
@@ -87,6 +88,7 @@ public class CommandProcessor {
         // put the tuple
         clientService.put(tuple);
         System.out.println("Put tuple: " + tuple);
+        System.out.println("OK");
     }
 
     private void read(String[] split) {
@@ -102,6 +104,7 @@ public class CommandProcessor {
         // read the tuple
         ReadResponse response = clientService.read(pattern);
         System.out.println("Read tuple:" + response.getResult());
+        System.out.println("OK");
     }
 
     private void take(String[] split) {
@@ -116,6 +119,7 @@ public class CommandProcessor {
         // take the tuple
         TakeResponse response = clientService.take(pattern);
         System.out.println("Took tuple:" + response.getResult());
+        System.out.println("OK");
     }
 
     private void getTupleSpacesState(String[] split) {
@@ -131,7 +135,7 @@ public class CommandProcessor {
         for (String tuple : response.getTupleList()) {
             System.out.println(tuple);
         }
-
+        System.out.println("OK");
     }
 
     private void sleep(String[] split) {

@@ -15,6 +15,7 @@ class ServiceEntry:
     def add_provider(self, provider: ServerEntry) -> None:
         # If the provider's identifier already exists it's entry is simply replaced
         self.providers[provider.qualifier] = provider
+        print("Registered provider:", provider.addr)
 
     def lookup(self, qualifier: str) -> list: 
         if qualifier == "":
