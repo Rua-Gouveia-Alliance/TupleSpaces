@@ -2,6 +2,7 @@ import sys
 from NameServer import NameServer
 from ServerEntry import ServerEntry
 from ServiceEntry import ServiceEntry
+from exceptions import ServerCreationException
 
 sys.path.insert(1, "../contract/target/generated-sources/protobuf/python")
 import grpc
@@ -19,7 +20,7 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
         try:
             server = ServerEntry(request.addr, request.qualifier)
             self.nameServer.add_server_to_service(request.service, server)
-        except Exception as exception:
+        except ServerCreationException as exception:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(str(exception))
         #TODO perguntar ao professor se faz sentido falhar na criação quando um qualifier não é dado
