@@ -1,5 +1,6 @@
 from ServiceEntry import ServiceEntry
 from ServerEntry import ServerEntry
+from exceptions.ServerDeletionException import ServerDeletionException
 
 
 class NameServer:
@@ -28,7 +29,7 @@ class NameServer:
     
     def remove_server_from_service(self, service_name: str, server_addr: str) -> None:
         if not self.is_registered(service_name):
-            raise Exception("Service does not exist")
-        if self.get_service(service_name).remove_provider(server_addr) == None:
+            raise ServerDeletionException("Service does not exist")
+        if not self.get_service(service_name).remove_provider(server_addr):
             # Raise exception if remove_provider fails
-            raise Exception("Service not provided by this server")
+            raise ServerDeletionException("Service not provided by this server")

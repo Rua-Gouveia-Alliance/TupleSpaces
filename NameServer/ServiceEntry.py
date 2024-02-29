@@ -24,10 +24,11 @@ class ServiceEntry:
             return [self.providers[qualifier].addr]
         return []
 
-    def remove_provider(self, addr: str) -> str:
-        for i in range(len(self.providers)):
-            if self.providers[i].addr == addr:
-                return self.providers.pop(i).addr
+    def remove_provider(self, addr: str) -> bool:
+        for qualifier in self.providers:
+            if self.providers[qualifier].addr == addr:
+                del self.providers[qualifier]
+                return True
         # Provider not found
-        return None
+        return False
             

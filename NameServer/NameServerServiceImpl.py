@@ -3,6 +3,7 @@ from NameServer import NameServer
 from ServerEntry import ServerEntry
 from ServiceEntry import ServiceEntry
 from exceptions.ServerCreationException import ServerCreationException
+from exceptions.ServerDeletionException import ServerDeletionException
 
 sys.path.insert(1, "../contract/target/generated-sources/protobuf/python")
 import grpc
@@ -40,9 +41,8 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
 
     def delete(self, request, context):
         try:
-            self.remove_server_from_service(request.service, request.server)
-        except:
+            self.nameServer.remove_server_from_service(request.service, request.addr)
+        except ServerDeletionException as exception:
             context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
-            context.set_details("Not possible to remove the server")
-
+            context.set_details(str(exception))
         return pb2.DeleteResponse()
