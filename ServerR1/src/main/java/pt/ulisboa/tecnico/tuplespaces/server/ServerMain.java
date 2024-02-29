@@ -12,9 +12,9 @@ import java.io.IOException;
 
 public class ServerMain {
 
-	static final String DNS_HOST = "localhost";
-	static final String DNS_PORT = "5001";
-	static final String SERVICE = "TupleSpaces";
+	private static final String DNS_HOST = "localhost";
+	private static final String DNS_PORT = "5001";
+	private static final String SERVICE = "TupleSpaces";
 
 	private static boolean checkArguments(String[] args) {
 		return checkPort(args[0]);
