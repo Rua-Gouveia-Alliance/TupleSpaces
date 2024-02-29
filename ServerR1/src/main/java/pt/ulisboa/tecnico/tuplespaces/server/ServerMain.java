@@ -7,6 +7,7 @@ import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingStub;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
+import sun.misc.Signal;
 
 import java.io.IOException;
 
@@ -30,7 +31,7 @@ public class ServerMain {
 		} catch (NumberFormatException e) {
 			return false;
 		}
-		return (d >= 1024 && d <= 65535); // check for invalid port numbers TODO can port be 5001?
+		return (d >= 1024 && d <= 65535); // check for invalid port numbers
 	}
 
 	private static void registerServer(int port, String qualifier) {
@@ -91,14 +92,18 @@ public class ServerMain {
 		// register in DNS server
 		registerServer(port, qualifier);
 
+		// handle ctrl+c to delete in DNS server
+		Signal.handle(new Signal("INT"), signal -> deleteServer(port, qualifier));
+
 		// wait until server is terminated
 		server.awaitTermination();
 
 		// delete in DNS server
-		deleteServer(port, qualifier); // TODO this or handle ctrl+c??
+		deleteServer(port, qualifier);
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
+
 
 		// receive and print arguments
 		System.out.printf("Received %d arguments%n", args.length);
