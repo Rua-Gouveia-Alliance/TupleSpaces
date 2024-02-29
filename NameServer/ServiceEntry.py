@@ -28,6 +28,7 @@ class ServiceEntry:
         for qualifier in self.providers:
             if self.providers[qualifier].addr == addr:
                 del self.providers[qualifier]
+                print("Removed provider:", addr)
                 return True
         # Provider not found
         return False
