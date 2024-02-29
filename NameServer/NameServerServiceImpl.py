@@ -19,9 +19,9 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
         try:
             server = ServerEntry(request.addr, request.qualifier)
             self.nameServer.add_server_to_service(request.service, server)
-        except:
+        except Exception as exception:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            context.set_details("Not possible to register the server")
+            context.set_details(str(exception))
         #TODO perguntar ao professor se faz sentido falhar na criação quando um qualifier não é dado
 
         return pb2.RegisterResponse()

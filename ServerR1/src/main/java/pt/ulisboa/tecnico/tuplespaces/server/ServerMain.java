@@ -48,7 +48,7 @@ public class ServerMain {
 			RegisterResponse response = stub.register(request);
 			channel.shutdown();
 		} catch (StatusRuntimeException e) {
-			System.err.println("Problem trying to delete server: " + e.getStatus().getDescription());
+			System.err.println("Problem trying to register the server: " + e.getStatus().getDescription());
 			System.exit(0);
 		}
 	}
@@ -67,7 +67,7 @@ public class ServerMain {
 			DeleteResponse response = stub.delete(request);
 			channel.shutdown();
 		} catch (StatusRuntimeException e) {
-			System.err.println("Problem trying to delete server: " + e.getStatus().getDescription());
+			System.err.println("Problem trying to delete the server: " + e.getStatus().getDescription());
 			System.exit(0);
 		}
 	}
