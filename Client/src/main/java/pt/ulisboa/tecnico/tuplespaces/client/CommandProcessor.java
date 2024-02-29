@@ -87,8 +87,8 @@ public class CommandProcessor {
 
         // put the tuple
         clientService.put(tuple);
-        System.out.println("Put tuple: " + tuple);
         System.out.println("OK");
+        System.out.println();
     }
 
     private void read(String[] split) {
@@ -103,8 +103,9 @@ public class CommandProcessor {
 
         // read the tuple
         ReadResponse response = clientService.read(pattern);
-        System.out.println("Read tuple:" + response.getResult());
         System.out.println("OK");
+        System.out.println(response.getResult());
+        System.out.println();
     }
 
     private void take(String[] split) {
@@ -118,8 +119,9 @@ public class CommandProcessor {
 
         // take the tuple
         TakeResponse response = clientService.take(pattern);
-        System.out.println("Took tuple:" + response.getResult());
         System.out.println("OK");
+        System.out.println(response.getResult());
+        System.out.println();
     }
 
     private void getTupleSpacesState(String[] split) {
@@ -132,10 +134,9 @@ public class CommandProcessor {
 
         // get the tuple spaces state
         getTupleSpacesStateResponse response = clientService.getTupleSpacesState();
-        for (String tuple : response.getTupleList()) {
-            System.out.println(tuple);
-        }
         System.out.println("OK");
+        System.out.println(response.getTupleList());
+        System.out.println();
     }
 
     private void sleep(String[] split) {

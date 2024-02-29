@@ -29,23 +29,9 @@ public class ClientMain {
 
     public static void main(String[] args) {
 
-        System.out.println(ClientMain.class.getSimpleName());
-
-        // receive and print arguments
-        System.out.printf("Received %d arguments%n", args.length);
-        for (int i = 0; i < args.length; i++) {
-            System.out.printf("arg[%d] = %s%n", i, args[i]);
-        }
-
         String qualifier = "";
-        if (args.length != 0) {
-            //qualifier = args[0];  TODO diferenciar por qualificador, para fase 2 do projeto
-            qualifier = "";
-        }
-
         String target = lookupServer(qualifier);
         CommandProcessor parser = new CommandProcessor(new ClientService(target));
-        System.out.println("Connected to server: " + target);
         parser.parseInput();
 
     }
