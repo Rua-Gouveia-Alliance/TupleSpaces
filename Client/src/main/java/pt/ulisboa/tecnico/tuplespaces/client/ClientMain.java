@@ -11,6 +11,7 @@ import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingS
 
 public class ClientMain {
 
+    // #TODO use local host as default??
     private static final String DNS_HOST = "localhost";
     private static final String DNS_PORT = "5001";
     private static final String SERVICE = "TupleSpaces";
