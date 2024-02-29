@@ -2,7 +2,7 @@ import sys
 from NameServer import NameServer
 from ServerEntry import ServerEntry
 from ServiceEntry import ServiceEntry
-from exceptions import ServerCreationException
+from exceptions.ServerCreationException import ServerCreationException
 
 sys.path.insert(1, "../contract/target/generated-sources/protobuf/python")
 import grpc

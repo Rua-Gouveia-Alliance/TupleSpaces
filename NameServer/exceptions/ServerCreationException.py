@@ -1,2 +1,2 @@
 class ServerCreationException(Exception):
-    pass
+    """Raised if ServerEntry creation fails"""

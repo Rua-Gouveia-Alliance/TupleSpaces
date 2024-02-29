@@ -1,5 +1,5 @@
 import ipaddress
-from exceptions import ServerCreationException
+from exceptions.ServerCreationException import ServerCreationException
 
 class ServerEntry:
     """
