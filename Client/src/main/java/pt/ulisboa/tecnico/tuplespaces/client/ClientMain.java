@@ -22,8 +22,12 @@ public class ClientMain {
         NameServerBlockingStub stub = NameServerGrpc.newBlockingStub(channel);
 
         // finding the TupleSpace's server address
-        LookupRequest request = LookupRequest.newBuilder().setService("TupleSpaces").setQualifier(qualifier).build();
+        LookupRequest request = LookupRequest.newBuilder().setService(SERVICE).setQualifier(qualifier).build();
         LookupResponse response = stub.lookup(request);
+        // checking if dns found any server providing the desired service
+        if (response.getServersCount() == 0) {
+            return null;
+        }
         return response.getServers(0);
     }
 
@@ -31,6 +35,11 @@ public class ClientMain {
 
         String qualifier = "";
         String target = lookupServer(qualifier);
+        if (target == null) {
+            System.out.println("No server providing the desired service at the moment.");
+            System.out.println("Exiting.");
+            System.exit(0);
+        }
         CommandProcessor parser = new CommandProcessor(new ClientService(target));
         parser.parseInput();
 
