@@ -58,18 +58,18 @@ public class ServerMain {
 		NameServerBlockingStub stub;
 		String dnsAddr = DNS_HOST + ":" + DNS_PORT;
 		String serverAddr = "localhost" + ":" + port; // TODO what host to register??
+		channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
 
 		try {
-			channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
 			stub = NameServerGrpc.newBlockingStub(channel);
-
 			DeleteRequest request = DeleteRequest.newBuilder().setService(SERVICE).setAddr(serverAddr).build();
 			DeleteResponse response = stub.delete(request);
 			channel.shutdown();
 		} catch (StatusRuntimeException e) {
+			channel.shutdown();
 			System.err.println("Problem trying to delete the server: " + e.getStatus().getDescription());
-			System.exit(0);
 		}
+		System.exit(0);
 	}
 
 	private static void startServer(int port, String qualifier) throws IOException, InterruptedException {
