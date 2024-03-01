@@ -31,7 +31,7 @@ public class ClientMain {
         LookupResponse response = stub.lookup(request);
         // checking if name server found any server providing the desired service
         if (response.getServersCount() == 0) {
-            debugMessage("No server with qualifier %s providing the desired service at the moment.", qualifier);
+            debugMessage("No server with qualifier %s providing the desired service at the moment", qualifier);
             return null;
         }
         debugMessage("Connected to server %s", response.getServers(0));
@@ -41,9 +41,9 @@ public class ClientMain {
     public static void main(String[] args) {
 
         // receive and print arguments
-		debugMessage("Received %d arguments%n", args.length);
+		debugMessage("Received %d arguments", args.length);
 		for (int i = 0; i < args.length; i++) {
-			debugMessage("arg[%d] = %s%n", i, args[i]);
+			debugMessage("arg[%d] = %s", i, args[i]);
             if (args[i].equals("-debug"))
                 DEBUG = true;
 		}

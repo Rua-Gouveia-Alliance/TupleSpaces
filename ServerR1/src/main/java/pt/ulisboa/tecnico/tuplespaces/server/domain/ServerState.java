@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 
 public class ServerState {
@@ -61,9 +60,10 @@ public class ServerState {
         boolean ret;
         do {
             tuple = read(pattern);
-
+            // more than one thread can arrive here with the same tuple to be removed
             lock.writeLock().lock();
             try {
+                // tries to remove the tuple but one of the threads might already have removed
                 ret = tuples.remove(tuple);
             } finally {
                 lock.writeLock().unlock();
