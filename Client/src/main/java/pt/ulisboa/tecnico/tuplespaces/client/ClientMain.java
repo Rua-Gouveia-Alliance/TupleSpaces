@@ -11,21 +11,20 @@ import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingS
 
 public class ClientMain {
 
-    // #TODO use local host as default??
-    private static final String DNS_HOST = "localhost";
-    private static final String DNS_PORT = "5001";
+    private static final String NS_HOST = "localhost";
+    private static final String NS_PORT = "5001";
     private static final String SERVICE = "TupleSpaces";
 
     private static String lookupServer(String qualifier) {
-        String dnsTarget = DNS_HOST + ":" + DNS_PORT;
+        String nsTarget = NS_HOST + ":" + NS_PORT;
 
-        ManagedChannel channel = ManagedChannelBuilder.forTarget(dnsTarget).usePlaintext().build();
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(nsTarget).usePlaintext().build();
         NameServerBlockingStub stub = NameServerGrpc.newBlockingStub(channel);
 
         // finding the TupleSpace's server address
         LookupRequest request = LookupRequest.newBuilder().setService(SERVICE).setQualifier(qualifier).build();
         LookupResponse response = stub.lookup(request);
-        // checking if dns found any server providing the desired service
+        // checking if name server found any server providing the desired service
         if (response.getServersCount() == 0) {
             return null;
         }
@@ -41,8 +40,13 @@ public class ClientMain {
             System.out.println("Exiting.");
             System.exit(0);
         }
-        CommandProcessor parser = new CommandProcessor(new ClientService(target));
-        parser.parseInput();
+
+        try {
+            CommandProcessor parser = new CommandProcessor(new ClientService(target));
+            parser.parseInput();
+        } catch (RuntimeException e) {
+            System.err.println("Connection to server failed, exiting.");
+        }
         System.exit(0);
     }
 }

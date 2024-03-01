@@ -1,4 +1,3 @@
-import ipaddress
 from exceptions.ServerCreationException import ServerCreationException
 
 class ServerEntry:
@@ -22,13 +21,6 @@ class ServerEntry:
         
         if port < 1024 or port > 65535:
             raise ServerCreationException("Invalid port number provided")
-
-        if decomposed_addr[0] != "localhost":
-            try:
-                # this raises an exception if the provided ip is invalid and is not localhost
-                ipaddress.ip_address(decomposed_addr[0])
-            except:
-                raise ServerCreationException("Invalid ip address provided")
 
         self.addr = addr  # host:port
         self.qualifier = qualifier

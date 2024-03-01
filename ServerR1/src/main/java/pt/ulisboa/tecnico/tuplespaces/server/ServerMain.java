@@ -4,18 +4,16 @@ import io.grpc.*;
 import pt.ulisboa.tecnico.tuplespaces.server.grpc.TupleSpacesImpl;
 
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
-import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingStub;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
 import sun.misc.Signal;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.io.IOException;
 
 public class ServerMain {
 
-	private static final String DNS_HOST = "localhost";
-	private static final String DNS_PORT = "5001";
+	private static final String ADDRESS = "localhost";
+	private static final String NS_HOST = "localhost";
+	private static final String NS_PORT = "5001";
 	private static final String SERVICE = "TupleSpaces";
 
 	private static boolean checkArguments(String[] args) {
@@ -38,18 +36,11 @@ public class ServerMain {
 	private static void registerServer(int port, String qualifier) {
 		ManagedChannel channel;
 		NameServerBlockingStub stub;
-		String dnsAddr = DNS_HOST + ":" + DNS_PORT;
-		String ip = "";
-		try {
-			ip = InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException e) {
-			System.out.println("Failed to get this server's ip address");
-			System.exit(1);
-		}
-		String serverAddr = ip + ":" + port;
+		String nsAddr = NS_HOST + ":" + NS_PORT;
+		String serverAddr = ADDRESS + ":" + port;
 
 		try {
-			channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
+			channel = ManagedChannelBuilder.forTarget(nsAddr).usePlaintext().build();
 			stub = NameServerGrpc.newBlockingStub(channel);
 
 			RegisterRequest request = RegisterRequest.newBuilder().setService(SERVICE).setAddr(serverAddr).setQualifier(qualifier).build();
@@ -64,16 +55,9 @@ public class ServerMain {
 	private static void deleteServer(int port, String qualifier) {
 		ManagedChannel channel;
 		NameServerBlockingStub stub;
-		String dnsAddr = DNS_HOST + ":" + DNS_PORT;
-		String ip = "";
-		try {
-			ip = InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException e) {
-			System.out.println("Failed to get this server's ip address");
-			System.exit(1);
-		}
-		String serverAddr = ip + ":" + port;
-		channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
+		String nsAddr = NS_HOST + ":" + NS_PORT;
+		String serverAddr = ADDRESS + ":" + port;
+		channel = ManagedChannelBuilder.forTarget(nsAddr).usePlaintext().build();
 
 		try {
 			stub = NameServerGrpc.newBlockingStub(channel);
@@ -104,16 +88,16 @@ public class ServerMain {
 		
 		System.out.println("Server started");
 
-		// register in DNS server
+		// register in name server
 		registerServer(port, qualifier);
 
-		// handle ctrl+c to delete in DNS server
+		// handle ctrl+c to delete in name server
 		Signal.handle(new Signal("INT"), signal -> deleteServer(port, qualifier));
 
 		// wait until server is terminated
 		server.awaitTermination();
 
-		// delete in DNS server
+		// delete in name server
 		deleteServer(port, qualifier);
 	}
 
