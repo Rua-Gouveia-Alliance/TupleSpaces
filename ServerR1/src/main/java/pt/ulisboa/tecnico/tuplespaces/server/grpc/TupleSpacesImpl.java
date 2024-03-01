@@ -16,7 +16,11 @@ import java.util.List;
 public class TupleSpacesImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
 
     // Server state implementation
-    private ServerState state = new ServerState();
+    private final ServerState state;
+
+    public TupleSpacesImpl() {
+        this.state = new ServerState();
+    }
 
     @Override
     public void put(TupleSpacesCentralized.PutRequest request,

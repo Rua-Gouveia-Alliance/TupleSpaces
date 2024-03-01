@@ -69,8 +69,6 @@
 				</executions>
 				<configuration>
 					<mainClass>${mainclass}</mainClass>
-					<arguments>
-					</arguments>
 				</configuration>
 			</plugin>
 		</plugins>

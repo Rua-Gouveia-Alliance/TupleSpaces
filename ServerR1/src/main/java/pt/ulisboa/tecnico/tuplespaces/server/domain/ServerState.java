@@ -7,8 +7,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ServerState {
 
-    private List<String> tuples;
-    private ReadWriteLock lock;
+    private final List<String> tuples;
+    private final ReadWriteLock lock;
 
     public ServerState() {
         this.tuples = new ArrayList<String>();

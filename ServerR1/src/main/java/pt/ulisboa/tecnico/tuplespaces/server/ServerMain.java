@@ -44,7 +44,10 @@ public class ServerMain {
 			stub = NameServerGrpc.newBlockingStub(channel);
 
 			RegisterRequest request = RegisterRequest.newBuilder().setService(SERVICE).setAddr(serverAddr).setQualifier(qualifier).build();
+
+			@SuppressWarnings("unused")
 			RegisterResponse response = stub.register(request);
+
 			channel.shutdown();
 		} catch (StatusRuntimeException e) {
 			System.err.println("Problem trying to register the server: " + e.getStatus().getDescription());
@@ -52,7 +55,7 @@ public class ServerMain {
 		}
 	}
 
-	private static void deleteServer(int port, String qualifier) {
+	private static void deleteServer(int port) {
 		ManagedChannel channel;
 		NameServerBlockingStub stub;
 		String nsAddr = NS_HOST + ":" + NS_PORT;
@@ -62,7 +65,10 @@ public class ServerMain {
 		try {
 			stub = NameServerGrpc.newBlockingStub(channel);
 			DeleteRequest request = DeleteRequest.newBuilder().setService(SERVICE).setAddr(serverAddr).build();
+
+			@SuppressWarnings("unused")
 			DeleteResponse response = stub.delete(request);
+
 			channel.shutdown();
 		} catch (StatusRuntimeException e) {
 			channel.shutdown();
@@ -81,7 +87,7 @@ public class ServerMain {
 		try {
 			server.start();
 		} catch (IOException e) {
-			System.err.println(e);
+			System.err.println(e.toString());
 			System.err.println("Port already in use!");
 			System.exit(0);
 		}
@@ -92,13 +98,13 @@ public class ServerMain {
 		registerServer(port, qualifier);
 
 		// handle ctrl+c to delete in name server
-		Signal.handle(new Signal("INT"), signal -> deleteServer(port, qualifier));
+		Signal.handle(new Signal("INT"), signal -> deleteServer(port));
 
 		// wait until server is terminated
 		server.awaitTermination();
 
 		// delete in name server
-		deleteServer(port, qualifier);
+		deleteServer(port);
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
