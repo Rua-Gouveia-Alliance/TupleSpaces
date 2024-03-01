@@ -8,7 +8,8 @@ import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingStub;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
 import sun.misc.Signal;
-
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.io.IOException;
 
 public class ServerMain {
@@ -38,7 +39,14 @@ public class ServerMain {
 		ManagedChannel channel;
 		NameServerBlockingStub stub;
 		String dnsAddr = DNS_HOST + ":" + DNS_PORT;
-		String serverAddr = "localhost" + ":" + port; // TODO what host to register??
+		String ip = "";
+		try {
+			ip = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			System.out.println("Failed to get this server's ip address");
+			System.exit(1);
+		}
+		String serverAddr = ip + ":" + port;
 
 		try {
 			channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
@@ -57,7 +65,14 @@ public class ServerMain {
 		ManagedChannel channel;
 		NameServerBlockingStub stub;
 		String dnsAddr = DNS_HOST + ":" + DNS_PORT;
-		String serverAddr = "localhost" + ":" + port; // TODO what host to register??
+		String ip = "";
+		try {
+			ip = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			System.out.println("Failed to get this server's ip address");
+			System.exit(1);
+		}
+		String serverAddr = ip + ":" + port;
 		channel = ManagedChannelBuilder.forTarget(dnsAddr).usePlaintext().build();
 
 		try {
