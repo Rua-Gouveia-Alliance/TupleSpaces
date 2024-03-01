@@ -64,10 +64,7 @@ Run to install the package grpcio-tools:
 ```s
 python -m pip install grpcio-tools
 ```
-When finished, to deactivate the virtual environment, run:
-```s
-deactivate
-```
+
 #### Setup a virtual environment in Windows:
 Run to create the virtual environment:
 ```s
@@ -85,10 +82,6 @@ Run to install the package grpcio-tools:
 ```s
 python -m pip install grpcio-tools
 ```
-When finished, to deactivate the virtual environment, run:
-```s
-deactivate
-```
 
 #### Run all processes in the same machine 
 
@@ -104,13 +97,6 @@ In the NameServer directory:
 python server.py
 ```
 
-In the Client directory:
-
-```s
-mvn clean compile
-mvn exec:java -Dexec.args="[qualifier] [-debug]"
-```
-
 In the ServerR1 directory:
 
 ```s
@@ -118,6 +104,12 @@ mvn clean compile
 mvn exec:java -Dexec.args="<port> <qualifier> [-debug]"
 ```
 
+In the Client directory:
+
+```s
+mvn clean compile
+mvn exec:java -Dexec.args="[qualifier] [-debug]"
+```
 
 ## Built With
 
