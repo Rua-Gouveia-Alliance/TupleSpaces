@@ -1,12 +1,15 @@
 package pt.ulisboa.tecnico.tuplespaces.server;
 
 import io.grpc.*;
-import pt.ulisboa.tecnico.tuplespaces.server.grpc.TupleSpacesImpl;
-
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingStub;
-import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.DeleteRequest;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.DeleteResponse;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.RegisterRequest;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.RegisterResponse;
+import pt.ulisboa.tecnico.tuplespaces.server.grpc.TupleSpacesImpl;
 import sun.misc.Signal;
+
 import java.io.IOException;
 
 public class ServerMain {

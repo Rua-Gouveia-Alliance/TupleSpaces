@@ -1,13 +1,12 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
-import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.LookupResponse;
-import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
-import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc.NameServerBlockingStub;
-
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.LookupRequest;
+import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.LookupResponse;
+import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
 
 public class ClientMain {
 

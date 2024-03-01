@@ -2,8 +2,8 @@ package pt.ulisboa.tecnico.tuplespaces.client.grpc;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized.*;
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesBlockingStub;
 
 public class ClientService {
