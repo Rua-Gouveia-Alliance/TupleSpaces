@@ -90,19 +90,13 @@ When finished, to deactivate the virtual environment, run:
 deactivate
 ```
 
-#### Install and compile necessary files
+#### Run all processes in the same machine 
 
-To compile and install all modules:
+In the Contract directory:
 
 ```s
-cd Contract/
-mvn clean install
-mvn exec:exec
-cd ..
-mvn compile
+mvn install exec:exec
 ```
-
-#### Run all processes in the same machine 
 
 In the NameServer directory:
 
@@ -113,12 +107,14 @@ python server.py
 In the Client directory:
 
 ```s
+mvn clean compile
 mvn exec:java -Dexec.args="[qualifier] [-debug]"
 ```
 
 In the ServerR1 directory:
 
 ```s
+mvn clean compile
 mvn exec:java -Dexec.args="<port> <qualifier> [-debug]"
 ```
 
