@@ -134,7 +134,7 @@ public class ServerMain {
 			return;
 		}
 
-		if (args[2].equals("-debug"))
+		if (args.length == 3 && args[2].equals("-debug"))
 			DEBUG = true;
 
 		// receive and print arguments
