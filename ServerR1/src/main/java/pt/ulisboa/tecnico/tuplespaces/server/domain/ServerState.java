@@ -15,7 +15,7 @@ public class ServerState {
         this.lock = new ReentrantReadWriteLock();
     }
 
-    public void put(String tuple) {
+    public synchronized void put(String tuple) {
         lock.writeLock().lock();
         try {
             tuples.add(tuple);
