@@ -89,6 +89,7 @@ public class CommandProcessor {
         // put the tuple
         clientService.put(tuple);
         System.out.println("OK");
+        System.out.println();
         debugMessage("Put tuple %s into TupleSpaces server", tuple);
     }
 
@@ -106,6 +107,7 @@ public class CommandProcessor {
         ReadResponse response = clientService.read(pattern);
         System.out.println("OK");
         System.out.println(response.getResult());
+        System.out.println();
         debugMessage("Read tuple %s from TupleSpaces server", pattern);
     }
 
@@ -122,6 +124,7 @@ public class CommandProcessor {
         TakeResponse response = clientService.take(pattern);
         System.out.println("OK");
         System.out.println(response.getResult());
+        System.out.println();
         debugMessage("Took tuple %s from TupleSpaces server", pattern);
     }
 
@@ -137,6 +140,7 @@ public class CommandProcessor {
         getTupleSpacesStateResponse response = clientService.getTupleSpacesState();
         System.out.println("OK");
         System.out.println(response.getTupleList());
+        System.out.println();
         debugMessage("Got all tuples from TupleSpaces");
     }
 

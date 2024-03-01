@@ -33,8 +33,8 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
         return pb2.RegisterResponse()
 
     def lookup(self, request, context):
-        logging.debug("Received lookup request with service %s, address %s and qualifier %s",
-                      request.service, request.addr, request.qualifier)
+        logging.debug("Received lookup request with service %s and qualifier %s",
+                      request.service, request.qualifier)
         if self.nameServer.is_registered(request.service):
             service = self.nameServer.get_service(request.service)
             requested_servers = service.lookup(request.qualifier)
@@ -43,11 +43,11 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
 
         response = pb2.LookupResponse()
         response.servers[:] = requested_servers
-        logging.debug("Sending lookup response:", requested_servers)
+        logging.debug("Sending lookup response:" + ', '.join(server for server in requested_servers))
         return response
 
     def delete(self, request, context):
-        logging.debug("Received lookup request with service %s, address %s and qualifier %s",
+        logging.debug("Received lookup request with service %s, address %s",
                       request.service, request.addr)
         try:
             self.nameServer.remove_server_from_service(request.service, request.addr)
