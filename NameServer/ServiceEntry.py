@@ -9,7 +9,6 @@ class ServiceEntry:
         # This service's name
         self.name = name
         # Servers that provide this service
- # TODO perguntar ao professor se podemos optar por utilizar um dicionário em vez de uma lista como é referido no guião
         self.providers = {}
 
     def add_provider(self, provider: ServerEntry) -> None:

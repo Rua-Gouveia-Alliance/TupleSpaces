@@ -24,7 +24,6 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
         except ServerCreationException as exception:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(str(exception))
-        #TODO perguntar ao professor se faz sentido falhar na criação quando um qualifier não é dado
 
         return pb2.RegisterResponse()
 
