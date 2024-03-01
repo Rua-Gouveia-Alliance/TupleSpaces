@@ -5,6 +5,8 @@ import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralize
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized.getTupleSpacesStateResponse;
 import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
 
+import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
+
 import java.util.Scanner;
 
 public class CommandProcessor {
@@ -87,7 +89,7 @@ public class CommandProcessor {
         // put the tuple
         clientService.put(tuple);
         System.out.println("OK");
-        System.out.println();
+        debugMessage("Put tuple %s into TupleSpaces server.", tuple);
     }
 
     private void read(String[] split) {
@@ -104,7 +106,7 @@ public class CommandProcessor {
         ReadResponse response = clientService.read(pattern);
         System.out.println("OK");
         System.out.println(response.getResult());
-        System.out.println();
+        debugMessage("Read tuple %s from TupleSpaces server.", pattern);
     }
 
     private void take(String[] split) {
@@ -120,7 +122,7 @@ public class CommandProcessor {
         TakeResponse response = clientService.take(pattern);
         System.out.println("OK");
         System.out.println(response.getResult());
-        System.out.println();
+        debugMessage("Took tuple %s from TupleSpaces server.", pattern);
     }
 
     private void getTupleSpacesState(String[] split) {
@@ -135,7 +137,7 @@ public class CommandProcessor {
         getTupleSpacesStateResponse response = clientService.getTupleSpacesState();
         System.out.println("OK");
         System.out.println(response.getTupleList());
-        System.out.println();
+        debugMessage("Got all tuples from TupleSpaces");
     }
 
     private void sleep(String[] split) {

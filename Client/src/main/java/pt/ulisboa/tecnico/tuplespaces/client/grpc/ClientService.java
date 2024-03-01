@@ -6,32 +6,39 @@ import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized.*;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesBlockingStub;
 
+import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
+
 public class ClientService {
 
   private final ManagedChannel channel;
   private final TupleSpacesBlockingStub stub;
 
   public ClientService(String target) {
+    debugMessage("Establishing rpc connection.");
     this.channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
     this.stub = TupleSpacesGrpc.newBlockingStub(channel);
   }
 
   public PutResponse put(String tuple) {
+    debugMessage("Requesting put operation to TupleSpaces Server.");
     PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
     return stub.put(request);
   }
 
   public TakeResponse take(String pattern) {
+    debugMessage("Requesting take operation to TupleSpaces Server.");
     TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
     return stub.take(request);
   }
 
   public ReadResponse read(String pattern) {
+    debugMessage("Requesting read operation to TupleSpaces Server.");
     ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
     return stub.read(request);
   }
 
   public getTupleSpacesStateResponse getTupleSpacesState() {
+    debugMessage("Requesting getTupleSpacesState operation to TupleSpaces Server.");
     getTupleSpacesStateRequest request = getTupleSpacesStateRequest.getDefaultInstance();
     return stub.getTupleSpacesState(request);
   }
