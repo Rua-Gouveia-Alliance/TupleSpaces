@@ -63,7 +63,6 @@ public class CommandProcessor {
                     case EXIT:
                         clientService.exit();
                         exit = true;
-                        System.exit(0);     //TODO o que é que é suposto o exit fazer?
                         break;
 
                     default:

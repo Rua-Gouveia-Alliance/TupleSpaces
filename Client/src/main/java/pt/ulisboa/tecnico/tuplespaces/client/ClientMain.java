@@ -43,6 +43,6 @@ public class ClientMain {
         }
         CommandProcessor parser = new CommandProcessor(new ClientService(target));
         parser.parseInput();
-
+        System.exit(0);
     }
 }
