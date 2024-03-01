@@ -1,5 +1,5 @@
-from ServiceEntry import ServiceEntry
 from ServerEntry import ServerEntry
+from ServiceEntry import ServiceEntry
 from exceptions.ServerDeletionException import ServerDeletionException
 
 

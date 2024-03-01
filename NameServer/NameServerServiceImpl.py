@@ -1,7 +1,8 @@
+import logging
 import sys
+
 from NameServer import NameServer
 from ServerEntry import ServerEntry
-from ServiceEntry import ServiceEntry
 from exceptions.ServerCreationException import ServerCreationException
 from exceptions.ServerDeletionException import ServerDeletionException
 
@@ -19,29 +20,40 @@ class NameServerServiceImpl(pb2_grpc.NameServerServicer):
 
     def register(self, request, context):
         try:
+            logging.debug("Received register request with service %s, address %s and qualifier %s",
+                          request.service, request.addr, request.qualifier)
             server = ServerEntry(request.addr, request.qualifier)
             self.nameServer.add_server_to_service(request.service, server)
         except ServerCreationException as exception:
+            logging.debug("Sending exception %s", str(exception))
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(str(exception))
 
+        logging.debug("Sending register response")
         return pb2.RegisterResponse()
 
     def lookup(self, request, context):
+        logging.debug("Received lookup request with service %s, address %s and qualifier %s",
+                      request.service, request.addr, request.qualifier)
         if self.nameServer.is_registered(request.service):
             service = self.nameServer.get_service(request.service)
-            requestedServers = service.lookup(request.qualifier)
+            requested_servers = service.lookup(request.qualifier)
         else:
-            requestedServers = []
+            requested_servers = []
 
         response = pb2.LookupResponse()
-        response.servers[:] = requestedServers
+        response.servers[:] = requested_servers
+        logging.debug("Sending lookup response:", requested_servers)
         return response
 
     def delete(self, request, context):
+        logging.debug("Received lookup request with service %s, address %s and qualifier %s",
+                      request.service, request.addr)
         try:
             self.nameServer.remove_server_from_service(request.service, request.addr)
         except ServerDeletionException as exception:
+            logging.debug("Sending exception %s", str(exception))
             context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
             context.set_details(str(exception))
+        logging.debug("Sending delete response")
         return pb2.DeleteResponse()

@@ -48,7 +48,7 @@ public class ClientMain {
                 DEBUG = true;
 		}
 
-		if (args.length != 0 && args.length != 1 && args.length != 2) {
+		if (args.length > 2) {
 			System.err.println("Wrong number of arguments.");
 			System.err.println("Usage: mvn exec:java -Dexec.args=[qualifier] [-debug]");
 			return;
@@ -65,7 +65,7 @@ public class ClientMain {
             CommandProcessor parser = new CommandProcessor(new ClientService(target));
             parser.parseInput();
         } catch (RuntimeException e) {
-            System.err.println("Connection to server failed, exiting.");
+            System.err.println("Connection to server failed, exiting...");
         }
         System.exit(0);
     }

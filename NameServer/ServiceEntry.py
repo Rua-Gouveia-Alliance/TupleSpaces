@@ -1,3 +1,5 @@
+import logging
+
 from ServerEntry import ServerEntry
 
 
@@ -14,7 +16,7 @@ class ServiceEntry:
     def add_provider(self, provider: ServerEntry) -> None:
         # If the provider's identifier already exists it's entry is simply replaced
         self.providers[provider.qualifier] = provider
-        print("Registered provider:", provider.addr)
+        logging.debug("Registered provider:", provider.addr)
 
     def lookup(self, qualifier: str) -> list: 
         if qualifier == "":
@@ -27,7 +29,7 @@ class ServiceEntry:
         for qualifier in self.providers:
             if self.providers[qualifier].addr == addr:
                 del self.providers[qualifier]
-                print("Removed provider:", addr)
+                logging.debug("Removed provider:", addr)
                 return True
         # Provider not found
         return False
