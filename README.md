@@ -45,11 +45,83 @@ mvn -version
 
 ### Installation
 
+
+#### Setup a virtual environment in Linux:
+
+Run to create the virtual environment:
+```s
+python -m venv .venv
+```
+Run to activate the virtual environment:
+```s
+source .venv/bin/activate
+```
+Run to install the package grpcio:
+```s
+python -m pip install grpcio
+```
+Run to install the package grpcio-tools:
+```s
+python -m pip install grpcio-tools
+```
+When finished, to deactivate the virtual environment, run:
+```s
+deactivate
+```
+#### Setup a virtual environment in Windows:
+Run to create the virtual environment:
+```s
+python -m venv .venv
+```
+Run to activate the virtual environment:
+```s
+.venv/Scripts/activate
+```
+Run to install the package grpcio:
+```s
+python -m pip install grpcio
+```
+Run to install the package grpcio-tools:
+```s
+python -m pip install grpcio-tools
+```
+When finished, to deactivate the virtual environment, run:
+```s
+deactivate
+```
+
+#### Install and compile necessary files
+
 To compile and install all modules:
 
 ```s
+cd Contract/
 mvn clean install
+mvn exec:exec
+cd ..
+mvn compile
 ```
+
+#### Run all processes in the same machine 
+
+In the NameServer directory:
+
+```s
+python server.py
+```
+
+In the Client directory:
+
+```s
+mvn exec:java -Dexec.args="[qualifier] [-debug]"
+```
+
+In the ServerR1 directory:
+
+```s
+mvn exec:java -Dexec.args="<port> <qualifier> [-debug]"
+```
+
 
 ## Built With
 
