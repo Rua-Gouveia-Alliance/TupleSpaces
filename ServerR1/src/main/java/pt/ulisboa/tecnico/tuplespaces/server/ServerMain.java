@@ -83,7 +83,7 @@ public class ServerMain {
 			server.start();
 		} catch (IOException e) {
 			System.err.println(e);
-			System.err.println("Port already in use!");		//TODO should we keep this?
+			System.err.println("Port already in use!");
 			System.exit(0);
 		}
 		
