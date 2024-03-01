@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
+
 public class ServerState {
 
     private final List<String> tuples;
@@ -19,6 +21,7 @@ public class ServerState {
         lock.writeLock().lock();
         try {
             tuples.add(tuple);
+            debugMessage("Add tuple: " + tuple);
             notifyAll();
         } finally {
             lock.writeLock().unlock();
@@ -30,9 +33,11 @@ public class ServerState {
         try {
             for (String tuple : this.tuples) {
                 if (tuple.matches(pattern)) {
+                    debugMessage("Found tuple: " + tuple);
                     return tuple;
                 }
             }
+            debugMessage("Patter %s not found", pattern);
             return null;
         } finally {
             lock.readLock().unlock();
@@ -64,6 +69,7 @@ public class ServerState {
                 lock.writeLock().unlock();
             }
         } while (!ret); // because in the moment of removal the tuple can no longer exist we need to make sure
+        debugMessage("Removed tuple " + tuple);
         return tuple;
     }
 
