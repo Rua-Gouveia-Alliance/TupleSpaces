@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.tuplespaces.client;
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
 import io.grpc.stub.StreamObserver;
+import pt.ulisboa.tecnico.tuplespaces.client.util.ResponseCollector;
 
 public class TupleSpacesObserver<R> implements StreamObserver<R> {
     
