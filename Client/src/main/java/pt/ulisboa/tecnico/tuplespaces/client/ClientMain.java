@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
+import java.util.ArrayList;
+
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
@@ -10,6 +12,7 @@ import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
 
 public class ClientMain {
 
+    public static final int numServers = 3;
     private static final String NS_HOST = "localhost";
     private static final String NS_PORT = "5001";
     private static final String SERVICE = "TupleSpaces";
@@ -20,7 +23,7 @@ public class ClientMain {
             System.err.printf("[DEBUG]" + format + "\n", args);
     }
  
-    private static String lookupServer(String qualifier) {
+    private static ArrayList<String> lookupServer(String qualifier) {
         String nsTarget = NS_HOST + ":" + NS_PORT;
 
         ManagedChannel channel = ManagedChannelBuilder.forTarget(nsTarget).usePlaintext().build();
@@ -34,8 +37,12 @@ public class ClientMain {
             debugMessage("No server with qualifier %s providing the desired service at the moment", qualifier);
             return null;
         }
-        debugMessage("Connected to server %s", response.getServers(0));
-        return response.getServers(0);
+        ArrayList<String> servers = new ArrayList<>();
+
+        // TODO: de certeza que existe uma forma melhor de converter isto para uma lista
+        response.getServersList().stream().forEach(server -> servers.add(server));
+
+        return servers;
     }
 
     public static void main(String[] args) {
@@ -55,14 +62,14 @@ public class ClientMain {
 		}
 
         String qualifier = "";
-        String target = lookupServer(qualifier);
-        if (target == null) {
+        ArrayList<String> targets = lookupServer(qualifier);
+        if (targets == null) {
             System.out.println("Exiting.");
             System.exit(0);
         }
 
         try {
-            CommandProcessor parser = new CommandProcessor(new ClientService(target));
+            CommandProcessor parser = new CommandProcessor(new ClientService(targets));
             parser.parseInput();
         } catch (RuntimeException e) {
             System.err.println("Connection to server failed, exiting...");
