@@ -19,11 +19,11 @@ public class ClientMain {
     private static final String SERVICE = "TupleSpaces";
     private static boolean DEBUG = false;
 
-    public static void debugMessage(String format, Object ... args) {
+    public static void debugMessage(String format, Object... args) {
         if (DEBUG)
             System.err.printf("[DEBUG]" + format + "\n", args);
     }
- 
+
     private static String lookupServer(String qualifier) {
         String nsTarget = NS_HOST + ":" + NS_PORT;
 
@@ -45,20 +45,21 @@ public class ClientMain {
     public static void main(String[] args) {
 
         // receive and print arguments
-		debugMessage("Received %d arguments", args.length);
-		for (int i = 0; i < args.length; i++) {
-			debugMessage("arg[%d] = %s", i, args[i]);
+        debugMessage("Received %d arguments", args.length);
+        for (int i = 0; i < args.length; i++) {
+            debugMessage("arg[%d] = %s", i, args[i]);
             if (args[i].equals("-debug"))
                 DEBUG = true;
-		}
+        }
 
-		if (args.length > 2) {
-			System.err.println("Wrong number of arguments.");
-			System.err.println("Usage: mvn exec:java -Dexec.args=[qualifier] [-debug]");
-			return;
-		}
+        if (args.length > 2) {
+            System.err.println("Wrong number of arguments.");
+            System.err.println("Usage: mvn exec:java -Dexec.args=[qualifier] [-debug]");
+            return;
+        }
 
         ArrayList<String> targets = new ArrayList<>();
+        // TODO: Should this be hard coded or just get the first three servers of the service
         targets.add(lookupServer("A"));
         targets.add(lookupServer("B"));
         targets.add(lookupServer("C"));

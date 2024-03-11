@@ -3,14 +3,14 @@ package pt.ulisboa.tecnico.tuplespaces.client.util;
 import java.util.ArrayList;
 
 public class ResponseCollector<R> {
-    private final int RESPONSE_COUNT = 2;
+    private final int RESPONSE_COUNT = 3;
     private ArrayList<R> responses = new ArrayList<>();
-    
+
     public synchronized void collect(R response) {
         responses.add(response);
         notifyAll();
     }
-    
+
     public synchronized void waitForAll() {
         while (responses.size() < RESPONSE_COUNT) {
             try {
@@ -30,7 +30,7 @@ public class ResponseCollector<R> {
             }
         }
     }
-    
+
     public ArrayList<R> getResponses() {
         return responses;
     }

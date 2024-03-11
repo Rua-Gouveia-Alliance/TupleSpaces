@@ -15,11 +15,13 @@ import java.util.ArrayList;
 
 public class ClientService {
 
+    private ArrayList<String> targets;
     private ArrayList<ManagedChannel> channels;
     private ArrayList<TupleSpacesStub> stubs;
     OrderedDelayer delayer;
 
     public ClientService(ArrayList<String> targets) {
+        this.targets = targets;
         debugMessage("Establishing rpc connection");
         targets.forEach(target -> {
             ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
@@ -82,12 +84,13 @@ public class ClientService {
         //return stub.take(request);
     }
 
-    // TODO: nao percebi como e que e suposto implementar este (diz no enunciado para nao ser replicado)
-    public getTupleSpacesStateResponse getTupleSpacesState() {
+    public getTupleSpacesStateResponse getTupleSpacesState(String qualifier) {
         debugMessage("Requesting getTupleSpacesState operation to TupleSpaces Server");
-        throw new RuntimeException("unimplemented");
-        //getTupleSpacesStateRequest request = getTupleSpacesStateRequest.getDefaultInstance();
-        //return stub.getTupleSpacesState(request);
+        getTupleSpacesStateRequest request = getTupleSpacesStateRequest.getDefaultInstance();
+        ResponseCollector<getTupleSpacesStateResponse> collector = new ResponseCollector<>();
+        stubs.get(targets.indexOf(qualifier)).getTupleSpacesState(request, new TupleSpacesObserver<>(collector));
+        collector.waitForFirst();
+        return collector.getResponses().get(0);
     }
 
     public void exit() {
