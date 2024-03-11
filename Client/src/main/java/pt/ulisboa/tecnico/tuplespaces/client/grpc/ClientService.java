@@ -6,6 +6,7 @@ import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralize
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesStub;
 import pt.ulisboa.tecnico.tuplespaces.client.TupleSpacesObserver;
+import pt.ulisboa.tecnico.tuplespaces.client.util.OrderedDelayer;
 import pt.ulisboa.tecnico.tuplespaces.client.util.ResponseCollector;
 
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
@@ -20,7 +21,7 @@ public class ClientService {
 
     public ClientService(ArrayList<String> targets) {
         debugMessage("Establishing rpc connection");
-        targets.stream().forEach(target -> {
+        targets.forEach(target -> {
             ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
             this.channels.add(channel);
             this.stubs.add(TupleSpacesGrpc.newStub(channel));
@@ -33,19 +34,17 @@ public class ClientService {
 
     /* This method allows the command processor to set the request delay assigned to a given server */
     public void setDelay(int id, int delay) {
+        // TODO: should we disallow the usage of setDelay when not in debug mode??
         delayer.setDelay(id, delay);
 
-        /* TODO: Remove this debug snippet */
-        System.out.println("[Debug only]: After setting the delay, I'll test it");
+        debugMessage("[Debug only]: After setting the delay, I'll test it");
         for (Integer i : delayer) {
-            System.out.println("[Debug only]: Now I can send request to stub[" + i + "]");
+            debugMessage("[Debug only]: Now I can send request to stub[" + i + "]");
         }
-        System.out.println("[Debug only]: Done.");
+        debugMessage("[Debug only]: Done.");
     }
 
-    /* TODO: individual methods for each remote operation of the TupleSpaces service */
-
-    /* Example: How to use the delayer before sending requests to each server 
+    /* Example: How to use the delayer before sending requests to each server
      *          Before entering each iteration of this loop, the delayer has already 
      *          slept for the delay associated with server indexed by 'id'.
      *          id is in the range 0..(numServers-1).
@@ -60,7 +59,8 @@ public class ClientService {
         debugMessage("Requesting put operation to TupleSpaces Server");
         PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
         ResponseCollector<PutResponse> collector = new ResponseCollector<>();
-        stubs.stream().forEach(stub -> stub.put(request, new TupleSpacesObserver<>(collector)));
+        for (Integer id : delayer)
+            stubs.get(id).put(request, new TupleSpacesObserver<>(collector));
         collector.waitForAll();
         return collector.getResponses().get(0);
     }
@@ -69,7 +69,8 @@ public class ClientService {
         debugMessage("Requesting read operation to TupleSpaces Server");
         ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
         ResponseCollector<ReadResponse> collector = new ResponseCollector<>();
-        stubs.stream().forEach(stub -> stub.read(request, new TupleSpacesObserver<>(collector)));
+        for (Integer id : delayer)
+            stubs.get(id).read(request, new TupleSpacesObserver<>(collector));
         collector.waitForFirst();
         return collector.getResponses().get(0);
     }
@@ -81,15 +82,15 @@ public class ClientService {
         //return stub.take(request);
     }
 
-// TODO: nao percebi como e que e suposto implementar este (diz no enunciado para nao ser replicado)
-  public getTupleSpacesStateResponse getTupleSpacesState() {
-    debugMessage("Requesting getTupleSpacesState operation to TupleSpaces Server");
-    throw new RuntimeException("unimplemented");
-    //getTupleSpacesStateRequest request = getTupleSpacesStateRequest.getDefaultInstance();
-    //return stub.getTupleSpacesState(request);
-  }
+    // TODO: nao percebi como e que e suposto implementar este (diz no enunciado para nao ser replicado)
+    public getTupleSpacesStateResponse getTupleSpacesState() {
+        debugMessage("Requesting getTupleSpacesState operation to TupleSpaces Server");
+        throw new RuntimeException("unimplemented");
+        //getTupleSpacesStateRequest request = getTupleSpacesStateRequest.getDefaultInstance();
+        //return stub.getTupleSpacesState(request);
+    }
 
-  public void exit() {
-    channels.stream().forEach(channel -> channel.shutdownNow());
-  }
+    public void exit() {
+        channels.forEach(ManagedChannel::shutdownNow);
+    }
 }

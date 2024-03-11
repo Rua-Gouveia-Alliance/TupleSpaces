@@ -74,7 +74,6 @@ public class CommandProcessor {
                 }
             }
         }
-        scanner.close();
     }
 
     private void put(String[] split) {
@@ -173,7 +172,7 @@ public class CommandProcessor {
             this.printUsage();
             return;
         }
-        // TODO qualifier used for debugging
+
         int qualifier = indexOfServerQualifier(split[1]);
         if (qualifier == -1)
             System.out.println("Invalid server qualifier");

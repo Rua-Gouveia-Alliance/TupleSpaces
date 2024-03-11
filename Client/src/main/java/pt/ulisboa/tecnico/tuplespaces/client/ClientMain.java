@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -23,7 +24,7 @@ public class ClientMain {
             System.err.printf("[DEBUG]" + format + "\n", args);
     }
  
-    private static ArrayList<String> lookupServer(String qualifier) {
+    private static String lookupServer(String qualifier) {
         String nsTarget = NS_HOST + ":" + NS_PORT;
 
         ManagedChannel channel = ManagedChannelBuilder.forTarget(nsTarget).usePlaintext().build();
@@ -37,12 +38,8 @@ public class ClientMain {
             debugMessage("No server with qualifier %s providing the desired service at the moment", qualifier);
             return null;
         }
-        ArrayList<String> servers = new ArrayList<>();
 
-        // TODO: de certeza que existe uma forma melhor de converter isto para uma lista
-        response.getServersList().stream().forEach(server -> servers.add(server));
-
-        return servers;
+        return response.getServersList().get(0);
     }
 
     public static void main(String[] args) {
@@ -61,15 +58,19 @@ public class ClientMain {
 			return;
 		}
 
-        String qualifier = "";
-        ArrayList<String> targets = lookupServer(qualifier);
-        if (targets == null) {
+        ArrayList<String> targets = new ArrayList<>();
+        targets.add(lookupServer("A"));
+        targets.add(lookupServer("B"));
+        targets.add(lookupServer("C"));
+
+        // TODO: should we crash the client if not available A, B and C??
+        if (targets.stream().anyMatch(Objects::isNull)) {
             System.out.println("Exiting.");
             System.exit(0);
         }
 
         try {
-            CommandProcessor parser = new CommandProcessor(new ClientService(ClientMain.numServers));
+            CommandProcessor parser = new CommandProcessor(new ClientService(targets));
             parser.parseInput();
         } catch (RuntimeException e) {
             System.err.println("Connection to server failed, exiting...");
