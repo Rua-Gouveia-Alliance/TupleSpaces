@@ -69,7 +69,7 @@ public class ClientMain {
         }
 
         try {
-            CommandProcessor parser = new CommandProcessor(new ClientService(targets));
+            CommandProcessor parser = new CommandProcessor(new ClientService(ClientMain.numServers));
             parser.parseInput();
         } catch (RuntimeException e) {
             System.err.println("Connection to server failed, exiting...");

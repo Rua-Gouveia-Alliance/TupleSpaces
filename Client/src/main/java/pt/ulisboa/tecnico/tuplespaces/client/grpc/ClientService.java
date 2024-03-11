@@ -14,42 +14,72 @@ import java.util.ArrayList;
 
 public class ClientService {
 
-  private ArrayList<ManagedChannel> channels;
-  private ArrayList<TupleSpacesStub> stubs;
+    private ArrayList<ManagedChannel> channels;
+    private ArrayList<TupleSpacesStub> stubs;
+    OrderedDelayer delayer;
 
-  public ClientService(ArrayList<String> targets) {
-    debugMessage("Establishing rpc connection");
-    targets.stream().forEach(target -> {
-      ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
-      this.channels.add(channel);
-      this.stubs.add(TupleSpacesGrpc.newStub(channel));
-    });
-  }
+    public ClientService(ArrayList<String> targets) {
+        debugMessage("Establishing rpc connection");
+        targets.stream().forEach(target -> {
+            ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
+            this.channels.add(channel);
+            this.stubs.add(TupleSpacesGrpc.newStub(channel));
+        });
 
-  public PutResponse put(String tuple) {
-    debugMessage("Requesting put operation to TupleSpaces Server");
-    PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
-    ResponseCollector<PutResponse> collector = new ResponseCollector<>();
-    stubs.stream().forEach(stub -> stub.put(request, new TupleSpacesObserver<>(collector)));
-    collector.waitForAll();
-    return collector.getResponses().get(0);
-}
+        /* The delayer can be used to inject delays to the sending of requests to the 
+        different servers, according to the per-server delays that have been set  */
+        delayer = new OrderedDelayer(targets.size());
+    }
 
-  public ReadResponse read(String pattern) {
-    debugMessage("Requesting read operation to TupleSpaces Server");
-    ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
-    ResponseCollector<ReadResponse> collector = new ResponseCollector<>();
-    stubs.stream().forEach(stub -> stub.read(request, new TupleSpacesObserver<>(collector)));
-    collector.waitForFirst();
-    return collector.getResponses().get(0);
-  }
+    /* This method allows the command processor to set the request delay assigned to a given server */
+    public void setDelay(int id, int delay) {
+        delayer.setDelay(id, delay);
 
-  public TakeResponse take(String pattern) {
-    debugMessage("Requesting take operation to TupleSpaces Server");
-    throw new RuntimeException("unimplemented");
-    //TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
-    //return stub.take(request);
-  }
+        /* TODO: Remove this debug snippet */
+        System.out.println("[Debug only]: After setting the delay, I'll test it");
+        for (Integer i : delayer) {
+            System.out.println("[Debug only]: Now I can send request to stub[" + i + "]");
+        }
+        System.out.println("[Debug only]: Done.");
+    }
+
+    /* TODO: individual methods for each remote operation of the TupleSpaces service */
+
+    /* Example: How to use the delayer before sending requests to each server 
+     *          Before entering each iteration of this loop, the delayer has already 
+     *          slept for the delay associated with server indexed by 'id'.
+     *          id is in the range 0..(numServers-1).
+    
+        for (Integer id : delayer) {
+            //stub[id].some_remote_method(some_arguments);
+        }
+
+    */
+
+    public PutResponse put(String tuple) {
+        debugMessage("Requesting put operation to TupleSpaces Server");
+        PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
+        ResponseCollector<PutResponse> collector = new ResponseCollector<>();
+        stubs.stream().forEach(stub -> stub.put(request, new TupleSpacesObserver<>(collector)));
+        collector.waitForAll();
+        return collector.getResponses().get(0);
+    }
+
+    public ReadResponse read(String pattern) {
+        debugMessage("Requesting read operation to TupleSpaces Server");
+        ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
+        ResponseCollector<ReadResponse> collector = new ResponseCollector<>();
+        stubs.stream().forEach(stub -> stub.read(request, new TupleSpacesObserver<>(collector)));
+        collector.waitForFirst();
+        return collector.getResponses().get(0);
+    }
+
+    public TakeResponse take(String pattern) {
+        debugMessage("Requesting take operation to TupleSpaces Server");
+        throw new RuntimeException("unimplemented");
+        //TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
+        //return stub.take(request);
+    }
 
 // TODO: nao percebi como e que e suposto implementar este (diz no enunciado para nao ser replicado)
   public getTupleSpacesStateResponse getTupleSpacesState() {
