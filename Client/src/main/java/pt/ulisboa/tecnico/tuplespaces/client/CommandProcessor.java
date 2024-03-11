@@ -120,13 +120,11 @@ public class CommandProcessor {
         String pattern = split[1];
 
         // take the tuple
-        /*
-        TakeResponse response = clientService.take(pattern);
+        String response = clientService.take(pattern);
         System.out.println("OK");
-        System.out.println(response.getResult());
+        System.out.println(response);
         System.out.println();
         debugMessage("Took tuple %s from TupleSpaces server", pattern);
-        */
     }
 
     private void getTupleSpacesState(String[] split) {
