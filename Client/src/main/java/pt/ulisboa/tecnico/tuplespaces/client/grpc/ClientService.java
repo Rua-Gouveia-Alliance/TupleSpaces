@@ -2,12 +2,13 @@ package pt.ulisboa.tecnico.tuplespaces.client.grpc;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesCentralized.*;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesStub;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc.TupleSpacesReplicaStub;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.*;
 import pt.ulisboa.tecnico.tuplespaces.client.TupleSpacesObserver;
 import pt.ulisboa.tecnico.tuplespaces.client.util.OrderedDelayer;
 import pt.ulisboa.tecnico.tuplespaces.client.util.ResponseCollector;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov;
 
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
@@ -17,16 +18,19 @@ public class ClientService {
 
     private ArrayList<String> targets;
     private ArrayList<ManagedChannel> channels;
-    private ArrayList<TupleSpacesStub> stubs;
+    private ArrayList<TupleSpacesReplicaStub> stubs;
     OrderedDelayer delayer;
 
     public ClientService(ArrayList<String> targets) {
         this.targets = targets;
+        channels = new ArrayList<>();
+        stubs = new ArrayList<>();
+
         debugMessage("Establishing rpc connection");
         targets.forEach(target -> {
             ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
             this.channels.add(channel);
-            this.stubs.add(TupleSpacesGrpc.newStub(channel));
+            this.stubs.add(TupleSpacesReplicaGrpc.newStub(channel));
         });
 
         /* The delayer can be used to inject delays to the sending of requests to the 
@@ -77,7 +81,14 @@ public class ClientService {
         return collector.getResponses().get(0);
     }
 
-    public TakeResponse take(String pattern) {
+    public TakePhase1Response take_p1(String pattern) {
+        debugMessage("Requesting take operation to TupleSpaces Server");
+        throw new RuntimeException("unimplemented");
+        //TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
+        //return stub.take(request);
+    }
+
+    public TakePhase2Response take_p2(String pattern) {
         debugMessage("Requesting take operation to TupleSpaces Server");
         throw new RuntimeException("unimplemented");
         //TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
