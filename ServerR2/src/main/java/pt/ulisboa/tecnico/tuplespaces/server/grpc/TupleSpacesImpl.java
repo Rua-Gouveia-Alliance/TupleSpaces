@@ -52,19 +52,49 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
     @Override
     public void takePhase1(TupleSpacesReplicaXuLiskov.TakePhase1Request request,
                      StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase1Response> responseObserver) {
-        responseObserver.onError(new RuntimeException("operation not implemented"));
+
+        String pattern = request.getSearchPattern();
+        Integer clientId = request.getClientId();
+        debugMessage("Received takePhase1 request of pattern " + pattern + "from client " + clientId);
+        List<String> tuples = state.takePhase1(pattern, clientId);
+
+        // create and send response
+        TupleSpacesReplicaXuLiskov.TakePhase1Response response = TupleSpacesReplicaXuLiskov.TakePhase1Response
+            .newBuilder().addAllReservedTuples(tuples).build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override
     public void takePhase1Release(TupleSpacesReplicaXuLiskov.TakePhase1ReleaseRequest request,
                      StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase1ReleaseResponse> responseObserver) {
-        responseObserver.onError(new RuntimeException("operation not implemented"));
+        
+        String clientId = request.getClientId();
+        debugMessage("Received takePhase1Release request of client " + clientId);
+        state.takePhase1Release(clientId);
+
+        // create and send response
+        TupleSpacesReplicaXuLiskov.TakePhase1ReleaseResponse response = TupleSpacesReplicaXuLiskov.TakePhase1ReleaseResponse.getDefaultInstance();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override
     public void takePhase2(TupleSpacesReplicaXuLiskov.TakePhase2Request request,
                      StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase2Response> responseObserver) {
-        responseObserver.onError(new RuntimeException("operation not implemented"));
+
+        String tuple = request.getTuple();
+        debugMessage("Received takePhase2 request of tuple " + tuple);
+        state.takePhase2(tuple);
+
+        // create and send response
+        TupleSpacesReplicaXuLiskov.TakePhase2Response response = TupleSpacesReplicaXuLiskov.TakePhase2Response
+            .newBuilder().addAllReservedTuples(tuples).build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override
