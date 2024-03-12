@@ -81,14 +81,18 @@ public class ServerState {
         }
     }
 
+    public void releaseAll(int clientId) {
+        for (Tuple t : tuples) {
+            if (t.getClientId() == clientId)
+                t.unlock();
+        }
+    }
+
     public void takePhase1Release(int clientId) {
         debugMessage("Take Phase 1 Release. clientId: " + clientId);
         lock.writeLock().lock();
         try {
-            for (Tuple t : tuples) {
-                if (t.getClientId() == clientId)
-                    t.unlock();
-            }
+            releaseAll(clientId);
         } finally {
             lock.writeLock().unlock();
         }
@@ -108,7 +112,7 @@ public class ServerState {
         lock.writeLock().lock();
         try {
             removeTuple(tuple, clientId);
-            takePhase1Release(clientId);
+            releaseAll(clientId);
         } finally {
             lock.writeLock().unlock();
         }
