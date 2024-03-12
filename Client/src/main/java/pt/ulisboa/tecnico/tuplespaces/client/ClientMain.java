@@ -14,8 +14,6 @@ import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
 public class ClientMain {
 
     public static final int numServers = 3;
-    private static final String NS_HOST = "localhost";
-    private static final String NS_PORT = "5001";
     private static final String SERVICE = "TupleSpaces";
     private static boolean DEBUG = false;
 
@@ -24,8 +22,35 @@ public class ClientMain {
             System.err.printf("[DEBUG]" + format + "\n", args);
     }
 
-    private static String lookupServer(String qualifier) {
-        String nsTarget = NS_HOST + ":" + NS_PORT;
+    private static boolean checkArguments(String[] args) {
+        return checkPort(args[0]) && checkClientId(args[2]);
+    }
+
+    private static boolean checkPort(String s) {
+        int d = isNumeric(s);
+        if (d == -1)
+            return false;
+        return (d >= 1024 && d <= 65535); // check for invalid port numbers
+    }
+
+    private static boolean checkClientId(String s) {
+        return isNumeric(s) != -1;
+    }
+
+    private static int isNumeric(String s) {
+        int d;
+        if (s == null) {
+            return -1;
+        }
+        try {
+            d = Integer.parseInt(s);    // check for numeric argument
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+        return d;
+    }
+
+    private static String lookupServer(String nsTarget, String qualifier) {
 
         ManagedChannel channel = ManagedChannelBuilder.forTarget(nsTarget).usePlaintext().build();
         NameServerBlockingStub stub = NameServerGrpc.newBlockingStub(channel);
@@ -52,19 +77,26 @@ public class ClientMain {
                 DEBUG = true;
         }
 
-        if (args.length < 2 || args.length > 3) {
+        if (args.length < 3 || args.length > 4) {
             System.err.println("Wrong number of arguments.");
-            System.err.println("Usage: mvn exec:java -Dexec.args=<host> <port> [-debug]");
-            // TODO add clientId as argument and update POMs
-            // TODO host and port of ns as arguments
+            System.err.println("Usage: mvn exec:java -Dexec.args=<host> <port> <clientId> [-debug]");
             return;
         }
 
+        if (!checkArguments(args)) {
+            System.err.println("Invalid arguments.");
+            return;
+        }
+
+        String host = args[0];
+        String port = args[1];
+        Integer clientId = Integer.valueOf(args[2]);
+        String target = host + ":" + port;
+
         ArrayList<String> targets = new ArrayList<>();
-        // TODO: Should this be hard coded or just get the first three servers of the service
-        targets.add(lookupServer("A"));
-        targets.add(lookupServer("B"));
-        targets.add(lookupServer("C"));
+        targets.add(lookupServer(target, "A"));
+        targets.add(lookupServer(target, "B"));
+        targets.add(lookupServer(target, "C"));
 
         // TODO: should we crash the client if not available A, B and C??
         if (targets.stream().anyMatch(Objects::isNull)) {

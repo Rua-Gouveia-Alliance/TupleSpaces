@@ -30,12 +30,12 @@ public class ServerMain {
 	}
 
 	private static boolean checkPort(String s) {
-		double d = -1;
+		int d;
 		if (s == null) {
 			return false;
 		}
 		try {
-			d = Double.parseDouble(s);    // check for numeric argument
+			d = Integer.parseInt(s);    // check for numeric argument
 		} catch (NumberFormatException e) {
 			return false;
 		}
