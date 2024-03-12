@@ -2,14 +2,13 @@ package pt.ulisboa.tecnico.tuplespaces.client.grpc;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import pt.ulisboa.tecnico.tuplespaces.client.util.exceptions.AllServersFailedException;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc.TupleSpacesReplicaStub;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.*;
 import pt.ulisboa.tecnico.tuplespaces.client.TupleSpacesObserver;
 import pt.ulisboa.tecnico.tuplespaces.client.util.OrderedDelayer;
 import pt.ulisboa.tecnico.tuplespaces.client.util.ResponseCollector;
-
-import static io.grpc.Status.NOT_FOUND;
 
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
@@ -77,16 +76,22 @@ public class ClientService {
     }
 
     public ReadResponse read(String pattern) {  //TODO: should read wait for first?
-        debugMessage("Requesting read operation to TupleSpaces Server of pattern: " + pattern);
-        ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
-        ResponseCollector<ReadResponse> collector = new ResponseCollector<>();
-        for (Integer id : delayer)
-            stubs.get(id).read(request, new TupleSpacesObserver<>(collector));
-        try {
-            collector.waitForFirst();
-        } catch (RuntimeException e) {
-            //TODO: what to do with caught NOT_FOUND
-        }
+        boolean repeat;
+        ResponseCollector<ReadResponse> collector;
+        do {
+            repeat = false;
+            debugMessage("Requesting read operation to TupleSpaces Server of pattern: " + pattern);
+            ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
+            collector = new ResponseCollector<>();
+            for (Integer id : delayer)
+                stubs.get(id).read(request, new TupleSpacesObserver<>(collector));
+            try {
+                collector.waitForFirst();
+            } catch (AllServersFailedException e) {
+                repeat = true;
+            }
+        } while (repeat);
+
         return collector.getResponses().get(0);
     }
 
@@ -169,7 +174,11 @@ public class ClientService {
         getTupleSpacesStateRequest request = getTupleSpacesStateRequest.getDefaultInstance();
         ResponseCollector<getTupleSpacesStateResponse> collector = new ResponseCollector<>();
         stubs.get(targets.indexOf(qualifier)).getTupleSpacesState(request, new TupleSpacesObserver<>(collector));
-        collector.waitForFirst();
+        try {
+            collector.waitForFirst();
+        } catch (AllServersFailedException e) {
+            throw new RuntimeException(e);
+        }
         return collector.getResponses().get(0);
     }
 
