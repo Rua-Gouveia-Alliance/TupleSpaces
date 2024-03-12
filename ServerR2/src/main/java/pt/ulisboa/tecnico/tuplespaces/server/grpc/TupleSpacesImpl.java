@@ -86,8 +86,9 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
                      StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase2Response> responseObserver) {
 
         String tuple = request.getTuple();
+        int clientId = request.getClientId();
         debugMessage("Received takePhase2 request of tuple " + tuple);
-        state.takePhase2(tuple);
+        state.takePhase2(tuple, clientId);
 
         // create and send response
         TupleSpacesReplicaXuLiskov.TakePhase2Response response = TupleSpacesReplicaXuLiskov.TakePhase2Response.getDefaultInstance();

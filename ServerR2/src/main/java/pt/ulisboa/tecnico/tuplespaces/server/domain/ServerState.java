@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.tuplespaces.server.domain;
 
+import pt.ulisboa.tecnico.tuplespaces.server.util.Tuple;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -8,18 +10,18 @@ import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 
 public class ServerState {
 
-    private final List<String> tuples;
+    private final List<Tuple> tuples;
     private final ReadWriteLock lock;
 
     public ServerState() {
-        this.tuples = new ArrayList<String>();
+        this.tuples = new ArrayList<>();
         this.lock = new ReentrantReadWriteLock();
     }
 
     public synchronized void put(String tuple) {
         lock.writeLock().lock();
         try {
-            tuples.add(tuple);
+            tuples.add(new Tuple(tuple));
             debugMessage("Add tuple: " + tuple);
             notifyAll();
         } finally {
@@ -30,10 +32,10 @@ public class ServerState {
     private String getMatchingTuple(String pattern) {
         lock.readLock().lock();
         try {
-            for (String tuple : this.tuples) {
+            for (Tuple tuple : this.tuples) {
                 if (tuple.matches(pattern)) {
                     debugMessage("Found tuple: " + tuple);
-                    return tuple;
+                    return tuple.getTuple();
                 }
             }
             debugMessage("Patter %s not found", pattern);
@@ -55,28 +57,43 @@ public class ServerState {
         return tuple;
     }
 
-    public String take(String pattern) {
-        String tuple;
-        boolean ret;
-        do {
-            tuple = read(pattern);
-            // more than one thread can arrive here with the same tuple to be removed
-            lock.writeLock().lock();
-            try {
-                // tries to remove the tuple but one of the threads might already have removed
-                ret = tuples.remove(tuple);
-            } finally {
-                lock.writeLock().unlock();
+    public List<String> takePhase1(String pattern, int clientId) {
+    }
+
+    public void takePhase1Release(int clientId) {
+    }
+
+    public void removeTuple(String tuple) {
+        for (Tuple t : tuples) {
+            if (t.getTuple().equals(tuple)) {
+                tuples.remove(t);
+                break;
             }
-        } while (!ret); // because in the moment of removal the tuple can no longer exist we need to make sure
-        debugMessage("Removed tuple " + tuple);
-        return tuple;
+        }
+    }
+
+    public void takePhase2(String tuple, int clientId) {
+        // TODO identify duplicated removes and don't remove again
+        lock.writeLock().lock();
+        try {
+            removeTuple(tuple);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public List<String> getAllTuples() {
+        List<String> stuples = new ArrayList<>();
+        for (Tuple t : tuples) {
+            stuples.add(t.getTuple());
+        }
+        return stuples;
     }
 
     public List<String> getTupleSpacesState() {
         lock.readLock().lock();
         try {
-            return new ArrayList<>(tuples);
+            return getAllTuples();
         } finally {
             lock.readLock().unlock();
         }
