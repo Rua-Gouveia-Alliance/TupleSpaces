@@ -8,7 +8,6 @@ import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplic
 import pt.ulisboa.tecnico.tuplespaces.client.TupleSpacesObserver;
 import pt.ulisboa.tecnico.tuplespaces.client.util.OrderedDelayer;
 import pt.ulisboa.tecnico.tuplespaces.client.util.ResponseCollector;
-import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov;
 
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
@@ -21,12 +20,13 @@ public class ClientService {
     private ArrayList<ManagedChannel> channels;
     private ArrayList<TupleSpacesReplicaStub> stubs;
     OrderedDelayer delayer;
-    private final int CLIENT_ID = 0; // TODO: how do we calculate the client_id??
+    private int clientId;
 
-    public ClientService(ArrayList<String> targets) {
+    public ClientService(ArrayList<String> targets, int clientId) {
         this.targets = targets;
         channels = new ArrayList<>();
         stubs = new ArrayList<>();
+        this.clientId = clientId;
 
         debugMessage("Establishing rpc connection");
         targets.forEach(target -> {
@@ -127,7 +127,7 @@ public class ClientService {
     public List<TakePhase1Response> take_p1(String pattern) {
         debugMessage("Requesting take phase 1 operation to TupleSpaces Servers of patter: " + pattern);
         TakePhase1Request request = TakePhase1Request.newBuilder().setSearchPattern(pattern).setClientId(
-                CLIENT_ID).build();
+                clientId).build();
         ResponseCollector<TakePhase1Response> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase1(request, new TupleSpacesObserver<>(collector));
@@ -138,7 +138,7 @@ public class ClientService {
 
     public List<TakePhase1ReleaseResponse> take_p1_release() {
         debugMessage("Requesting take phase 1 release operation to TupleSpaces Servers");
-        TakePhase1ReleaseRequest request = TakePhase1ReleaseRequest.newBuilder().setClientId(CLIENT_ID).build();
+        TakePhase1ReleaseRequest request = TakePhase1ReleaseRequest.newBuilder().setClientId(clientId).build();
         ResponseCollector<TakePhase1ReleaseResponse> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase1Release(request, new TupleSpacesObserver<>(collector));
@@ -149,7 +149,7 @@ public class ClientService {
 
     public List<TakePhase2Response> take_p2(String tuple) {
         debugMessage("Requesting take phase 2 operation to TupleSpaces Servers of tuple: " + tuple);
-        TakePhase2Request request = TakePhase2Request.newBuilder().setTuple(tuple).setClientId(CLIENT_ID).build();
+        TakePhase2Request request = TakePhase2Request.newBuilder().setTuple(tuple).setClientId(clientId).build();
         ResponseCollector<TakePhase2Response> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase2(request, new TupleSpacesObserver<>(collector));

@@ -184,7 +184,6 @@ public class CommandProcessor {
             return;
         }
 
-        // register delay <time> for when calling server <qualifier> TODO
         this.clientService.setDelay(qualifier, time);
     }
 

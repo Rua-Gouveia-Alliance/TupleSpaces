@@ -90,7 +90,7 @@ public class ClientMain {
 
         String host = args[0];
         String port = args[1];
-        Integer clientId = Integer.valueOf(args[2]);
+        int clientId = Integer.parseInt(args[2]);
         String target = host + ":" + port;
 
         ArrayList<String> targets = new ArrayList<>();
@@ -105,7 +105,7 @@ public class ClientMain {
         }
 
         try {
-            CommandProcessor parser = new CommandProcessor(new ClientService(targets));
+            CommandProcessor parser = new CommandProcessor(new ClientService(targets, clientId));
             parser.parseInput();
         } catch (RuntimeException e) {
             System.err.println("Connection to server failed, exiting...");
