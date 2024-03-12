@@ -7,7 +7,6 @@ import java.util.Scanner;
 
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
-// TODO: acrescentar cenas que os stores deram para a segunda entrega
 public class CommandProcessor {
 
     private static final String SPACE = " ";

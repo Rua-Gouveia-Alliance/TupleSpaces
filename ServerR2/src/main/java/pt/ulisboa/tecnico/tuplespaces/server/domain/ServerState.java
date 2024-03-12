@@ -59,6 +59,7 @@ public class ServerState {
     }
 
     public List<String> takePhase1(String pattern, int clientId) {
+        debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
         lock.writeLock().lock();
         try {
             List<String> stuples = new ArrayList<>();
@@ -77,6 +78,7 @@ public class ServerState {
     }
 
     public void takePhase1Release(int clientId) {
+        debugMessage("Take Phase 1 Release. clientId: " + clientId);
         lock.writeLock().lock();
         try {
             for (Tuple t : tuples) {
@@ -98,6 +100,7 @@ public class ServerState {
     }
 
     public void takePhase2(String tuple, int clientId) {
+        debugMessage("Take Phase 2. Tuple: " + tuple + ", clientId: " + clientId);
         // TODO identify duplicated removes and don't remove again
         lock.writeLock().lock();
         try {
