@@ -67,6 +67,7 @@ public class ServerState {
             for (Tuple t : tuples) {
                 if (t.matches(pattern)) {
                     if (t.isLocked())
+                        // TODO should we unlock all locked until now????
                         return new ArrayList<>();
                     t.lock(clientId);
                     stuples.add(t.getTuple());
@@ -93,9 +94,9 @@ public class ServerState {
         }
     }
 
-    public void removeTuple(String tuple) {
+    public void removeTuple(String tuple, int clientId) {
         for (Tuple t : tuples) {
-            if (t.getTuple().equals(tuple)) {
+            if (t.getTuple().equals(tuple) && t.getClientId() == clientId) {
                 tuples.remove(t);
                 break;
             }
@@ -104,10 +105,10 @@ public class ServerState {
 
     public void takePhase2(String tuple, int clientId) {
         debugMessage("Take Phase 2. Tuple: " + tuple + ", clientId: " + clientId);
-        // TODO identify duplicated removes and don't remove again
         lock.writeLock().lock();
         try {
-            removeTuple(tuple);
+            removeTuple(tuple, clientId);
+            takePhase1Release(clientId);
         } finally {
             lock.writeLock().unlock();
         }
