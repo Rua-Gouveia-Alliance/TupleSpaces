@@ -51,7 +51,7 @@ public class ServerState {
         String tuple;
         while ((tuple = getMatchingTuple(pattern)) == null) {
             try {
-                wait();
+                wait(); // TODO THIS DOESNT WORK WITH READ/WRITE LOCKS
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

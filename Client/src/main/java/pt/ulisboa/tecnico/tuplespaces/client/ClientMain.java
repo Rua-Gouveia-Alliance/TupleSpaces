@@ -55,9 +55,10 @@ public class ClientMain {
         if (args.length < 2 || args.length > 3) {
             System.err.println("Wrong number of arguments.");
             System.err.println("Usage: mvn exec:java -Dexec.args=<host> <port> [-debug]");
+            // TODO add clientId as argument and update POMs
+            // TODO host and port of ns as arguments
             return;
         }
-        // TODO host and port of ns as arguments
 
         ArrayList<String> targets = new ArrayList<>();
         // TODO: Should this be hard coded or just get the first three servers of the service
