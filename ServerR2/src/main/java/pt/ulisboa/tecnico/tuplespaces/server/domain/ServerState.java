@@ -61,6 +61,15 @@ public class ServerState {
     }
 
     public void takePhase1Release(int clientId) {
+        lock.writeLock().lock();
+        try {
+            for (Tuple t : tuples) {
+                if (t.getClientId() == clientId)
+                    t.unlock();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public void removeTuple(String tuple) {
