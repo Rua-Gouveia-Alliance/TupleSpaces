@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 
 public class ServerState {
@@ -64,7 +65,9 @@ public class ServerState {
         try {
             List<String> stuples = new ArrayList<>();
             for (Tuple t : tuples) {
-                if (!t.isLocked() && t.getTuple().equals(pattern)) {
+                if (t.matches(pattern)) {
+                    if (t.isLocked())
+                        return new ArrayList<>();
                     t.lock(clientId);
                     stuples.add(t.getTuple());
                 }
