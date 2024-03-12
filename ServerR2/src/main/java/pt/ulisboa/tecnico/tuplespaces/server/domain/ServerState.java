@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.tuplespaces.server.domain;
 
 import pt.ulisboa.tecnico.tuplespaces.server.util.Tuple;
+import pt.ulisboa.tecnico.tuplespaces.server.util.exception.TupleLockedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +59,21 @@ public class ServerState {
     }
 
     public List<String> takePhase1(String pattern, int clientId) {
+        lock.writeLock().lock();
+        try {
+            List<String> stuples = new ArrayList<>();
+            for (Tuple t : tuples) {
+                if (!t.isLocked() && t.getTuple().equals(pattern)) {
+                    t.lock(clientId);
+                    stuples.add(t.getTuple());
+                }
+            }
+            return stuples;
+        } catch (TupleLockedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public void takePhase1Release(int clientId) {
