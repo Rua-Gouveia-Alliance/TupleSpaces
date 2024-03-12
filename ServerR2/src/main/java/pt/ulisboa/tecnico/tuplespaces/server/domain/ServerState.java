@@ -40,7 +40,7 @@ public class ServerState {
                     return tuple.getTuple();
                 }
             }
-            debugMessage("Patter %s not found", pattern);
+            debugMessage("Pattern %s not found", pattern);
             return null;
         } finally {
             lock.readLock().unlock();
@@ -48,15 +48,12 @@ public class ServerState {
     }
 
     public String read(String pattern) {
-        String tuple;
-        while ((tuple = getMatchingTuple(pattern)) == null) {
-            try {
-                wait(); // TODO THIS DOESNT WORK WITH READ/WRITE LOCKS
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        lock.readLock().lock();
+        try {
+            return getMatchingTuple(pattern);
+        } finally {
+            lock.readLock().unlock();
         }
-        return tuple;
     }
 
     public List<String> takePhase1(String pattern, int clientId) {

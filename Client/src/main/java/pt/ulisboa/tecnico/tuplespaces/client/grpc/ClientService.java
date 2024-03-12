@@ -9,6 +9,8 @@ import pt.ulisboa.tecnico.tuplespaces.client.TupleSpacesObserver;
 import pt.ulisboa.tecnico.tuplespaces.client.util.OrderedDelayer;
 import pt.ulisboa.tecnico.tuplespaces.client.util.ResponseCollector;
 
+import static io.grpc.Status.NOT_FOUND;
+
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
 import java.util.ArrayList;
@@ -74,13 +76,17 @@ public class ClientService {
         return collector.getResponses().get(0);
     }
 
-    public ReadResponse read(String pattern) {
+    public ReadResponse read(String pattern) {  //TODO: should read wait for first?
         debugMessage("Requesting read operation to TupleSpaces Server of pattern: " + pattern);
         ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
         ResponseCollector<ReadResponse> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).read(request, new TupleSpacesObserver<>(collector));
-        collector.waitForFirst();
+        try {
+            collector.waitForFirst();
+        } catch (RuntimeException e) {
+            //TODO: what to do with caught NOT_FOUND
+        }
         return collector.getResponses().get(0);
     }
 
