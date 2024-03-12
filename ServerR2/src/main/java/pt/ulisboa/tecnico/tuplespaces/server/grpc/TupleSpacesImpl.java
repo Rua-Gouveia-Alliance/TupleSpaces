@@ -70,7 +70,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
     public void takePhase1Release(TupleSpacesReplicaXuLiskov.TakePhase1ReleaseRequest request,
                      StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase1ReleaseResponse> responseObserver) {
         
-        String clientId = request.getClientId();
+        int clientId = request.getClientId();
         debugMessage("Received takePhase1Release request of client " + clientId);
         state.takePhase1Release(clientId);
 
@@ -90,8 +90,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         state.takePhase2(tuple);
 
         // create and send response
-        TupleSpacesReplicaXuLiskov.TakePhase2Response response = TupleSpacesReplicaXuLiskov.TakePhase2Response
-            .newBuilder().addAllReservedTuples(tuples).build();
+        TupleSpacesReplicaXuLiskov.TakePhase2Response response = TupleSpacesReplicaXuLiskov.TakePhase2Response.getDefaultInstance();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
