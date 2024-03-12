@@ -36,7 +36,7 @@ public class ServerState {
                     return tuple;
                 }
             }
-            debugMessage("Patter %s not found", pattern);
+            debugMessage("Pattern %s not found", pattern);
             return null;
         } finally {
             lock.readLock().unlock();
