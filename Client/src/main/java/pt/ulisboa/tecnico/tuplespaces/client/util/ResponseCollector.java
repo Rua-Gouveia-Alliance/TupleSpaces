@@ -16,7 +16,8 @@ public class ResponseCollector<R> {
         notifyAll();
     }
 
-    public synchronized void waitForAll() {
+    // TODO: Add timeouts, if it times out return false
+    public synchronized boolean waitForAll() {
         while (responses.size() < RESPONSE_COUNT) {
             try {
                 wait();
@@ -24,6 +25,7 @@ public class ResponseCollector<R> {
                 throw new RuntimeException(e);
             }
         }
+        return true;
     }
 
     public synchronized void incrementError() {
@@ -31,16 +33,16 @@ public class ResponseCollector<R> {
         notifyAll();
     }
 
-    public synchronized void waitForFirst() throws AllServersFailedException {
+    // TODO: Add timeouts, if it times out return false
+    public synchronized boolean waitForFirst() {
         while (responses.size() < 1) {
-            if (errors == responses.size())
-                throw new AllServersFailedException("No server has requested tuple");
             try {
                 wait();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+        return true;
     }
 
     public ArrayList<R> getResponses() {

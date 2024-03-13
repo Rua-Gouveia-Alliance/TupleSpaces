@@ -68,29 +68,26 @@ public class ClientService {
         debugMessage("Requesting put operation to TupleSpaces Server of tuple: " + tuple);
         PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
         ResponseCollector<PutResponse> collector = new ResponseCollector<>();
-        for (Integer id : delayer)
-            stubs.get(id).put(request, new TupleSpacesObserver<>(collector));
-        // TODO: what if a replica does not respond? should we repeat after a certain time?
-        collector.waitForAll();
+        TupleSpacesObserver<PutResponse> observer = new TupleSpacesObserver<>(collector);
+
+        do {
+            for (Integer id : delayer)
+                stubs.get(id).put(request, observer);
+        } while (!collector.waitForAll());
+
         return collector.getResponses().get(0);
     }
 
-    public ReadResponse read(String pattern) {  //TODO: should read wait for first?
-        boolean repeat;
-        ResponseCollector<ReadResponse> collector;
+    public ReadResponse read(String pattern) {
+        debugMessage("Requesting read operation to TupleSpaces Server of pattern: " + pattern);
+        ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
+        ResponseCollector<ReadResponse> collector = new ResponseCollector<>();
+        TupleSpacesObserver<ReadResponse> observer = new TupleSpacesObserver<>(collector);
+
         do {
-            repeat = false;
-            debugMessage("Requesting read operation to TupleSpaces Server of pattern: " + pattern);
-            ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
-            collector = new ResponseCollector<>();
             for (Integer id : delayer)
-                stubs.get(id).read(request, new TupleSpacesObserver<>(collector));
-            try {
-                collector.waitForFirst();
-            } catch (AllServersFailedException e) {
-                repeat = true;
-            }
-        } while (repeat);
+                stubs.get(id).read(request, observer);
+        } while (!collector.waitForFirst());
 
         return collector.getResponses().get(0);
     }
@@ -173,12 +170,13 @@ public class ClientService {
         debugMessage("Requesting getTupleSpacesState operation to TupleSpaces Server replica: " + qualifier);
         getTupleSpacesStateRequest request = getTupleSpacesStateRequest.getDefaultInstance();
         ResponseCollector<getTupleSpacesStateResponse> collector = new ResponseCollector<>();
-        stubs.get(targets.indexOf(qualifier)).getTupleSpacesState(request, new TupleSpacesObserver<>(collector));
-        try {
-            collector.waitForFirst();
-        } catch (AllServersFailedException e) {
-            throw new RuntimeException(e);
-        }
+        TupleSpacesObserver<getTupleSpacesStateResponse> observer = new TupleSpacesObserver<>(collector);
+        TupleSpacesReplicaStub stub = stubs.get(targets.indexOf(qualifier));
+
+        do {
+            stub.getTupleSpacesState(request, observer);
+        } while (!collector.waitForFirst());
+
         return collector.getResponses().get(0);
     }
 
