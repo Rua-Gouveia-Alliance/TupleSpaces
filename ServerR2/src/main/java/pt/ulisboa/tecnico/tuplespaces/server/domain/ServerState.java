@@ -62,12 +62,12 @@ public class ServerState {
         lock.writeLock().lock();
         try {
             List<String> stuples = new ArrayList<>();
-            tuples.forEach(t -> {
+            for (Tuple t : tuples) {
                 if (t.matches(pattern)) {
                     t.lock(clientId);
                     stuples.add(t.getTuple());
                 }
-            });
+            }
             return stuples;
         } catch (TupleLockedException e) {
             releaseAll(clientId);
