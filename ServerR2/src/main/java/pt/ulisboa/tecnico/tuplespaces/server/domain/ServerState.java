@@ -13,53 +13,42 @@ import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 public class ServerState {
 
     private final List<Tuple> tuples;
-    private final ReadWriteLock lock;
 
     public ServerState() {
         this.tuples = new ArrayList<>();
-        this.lock = new ReentrantReadWriteLock();
     }
 
     public synchronized void put(String tuple) {
-        lock.writeLock().lock();
-        try {
-            tuples.add(new Tuple(tuple));
-            debugMessage("Add tuple: " + tuple);
-            notifyAll();
-        } finally {
-            lock.writeLock().unlock();
-        }
+        tuples.add(new Tuple(tuple));
+        debugMessage("Add tuple: " + tuple);
+        notifyAll();
     }
 
     private String getMatchingTuple(String pattern) {
-        lock.readLock().lock();
-        try {
-            for (Tuple tuple : this.tuples) {
-                if (tuple.matches(pattern)) {
-                    debugMessage("Found tuple: " + tuple);
-                    return tuple.getTuple();
-                }
+        for (Tuple tuple : this.tuples) {
+            if (tuple.matches(pattern)) {
+                debugMessage("Found tuple: " + tuple);
+                return tuple.getTuple();
             }
-            debugMessage("Pattern %s not found", pattern);
-            return null;
-        } finally {
-            lock.readLock().unlock();
         }
+        debugMessage("Pattern %s not found", pattern);
+        return null;
     }
 
-    public String read(String pattern) {
-        // TODO this should block if not found tuple, revert
-        lock.readLock().lock();
-        try {
-            return getMatchingTuple(pattern);
-        } finally {
-            lock.readLock().unlock();
+    public synchronized String read(String pattern) {
+        String tuple;
+        while ((tuple = getMatchingTuple(pattern)) == null) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
+        return tuple;
     }
 
-    public List<String> takePhase1(String pattern, int clientId) {
+    public synchronized List<String> takePhase1(String pattern, int clientId) {
         debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
-        lock.writeLock().lock();
         try {
             ArrayList<String> stuples = new ArrayList<>();
             for (Tuple t : tuples) {
@@ -74,8 +63,6 @@ public class ServerState {
         } catch (TupleLockedException e) {
             releaseAll(clientId);
             return new ArrayList<>();
-        } finally {
-            lock.writeLock().unlock();
         }
     }
 
@@ -86,14 +73,9 @@ public class ServerState {
         }
     }
 
-    public void takePhase1Release(int clientId) {
+    public synchronized void takePhase1Release(int clientId) {
         debugMessage("Take Phase 1 Release. clientId: " + clientId);
-        lock.writeLock().lock();
-        try {
-            releaseAll(clientId);
-        } finally {
-            lock.writeLock().unlock();
-        }
+        releaseAll(clientId);
     }
 
     public void removeTuple(String tuple, int clientId) {
@@ -105,15 +87,10 @@ public class ServerState {
         }
     }
 
-    public void takePhase2(String tuple, int clientId) {
+    public synchronized void takePhase2(String tuple, int clientId) {
         debugMessage("Take Phase 2. Tuple: " + tuple + ", clientId: " + clientId);
-        lock.writeLock().lock();
-        try {
-            removeTuple(tuple, clientId);
-            releaseAll(clientId);
-        } finally {
-            lock.writeLock().unlock();
-        }
+        removeTuple(tuple, clientId);
+        releaseAll(clientId);
     }
 
     public List<String> getAllTuples() {
@@ -124,12 +101,7 @@ public class ServerState {
         return stuples;
     }
 
-    public List<String> getTupleSpacesState() {
-        lock.readLock().lock();
-        try {
-            return getAllTuples();
-        } finally {
-            lock.readLock().unlock();
-        }
+    public synchronized List<String> getTupleSpacesState() {
+        return getAllTuples();
     }
 }
