@@ -63,10 +63,9 @@ public class ClientService {
         debugMessage("Requesting put operation to TupleSpaces Server of tuple: " + tuple);
         PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
         ResponseCollector<PutResponse> collector = new ResponseCollector<>();
-        TupleSpacesObserver<PutResponse> observer = new TupleSpacesObserver<>(collector);
 
         for (Integer id : delayer)
-            stubs.get(id).put(request, observer);
+            stubs.get(id).put(request, new TupleSpacesObserver<>(collector));
 
         collector.waitForAll();
         return collector.getResponses().get(0);
@@ -76,10 +75,9 @@ public class ClientService {
         debugMessage("Requesting read operation to TupleSpaces Server of pattern: " + pattern);
         ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
         ResponseCollector<ReadResponse> collector = new ResponseCollector<>();
-        TupleSpacesObserver<ReadResponse> observer = new TupleSpacesObserver<>(collector);
 
         for (Integer id : delayer)
-            stubs.get(id).read(request, observer);
+            stubs.get(id).read(request, new TupleSpacesObserver<>(collector));
 
         collector.waitForFirst();
         return collector.getResponses().get(0);
