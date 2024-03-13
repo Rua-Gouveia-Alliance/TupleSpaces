@@ -65,7 +65,9 @@ public class ServerState {
             for (Tuple t : tuples) {
                 if (t.matches(pattern)) {
                     t.lock(clientId);
-                    stuples.add(t.getTuple());
+                    if (!stuples.stream().anyMatch(t.getTuple())) {
+                        stuples.add(t.getTuple());
+                    }
                 }
             }
             return stuples;
