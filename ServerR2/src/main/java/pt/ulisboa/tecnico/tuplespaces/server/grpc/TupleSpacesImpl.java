@@ -9,7 +9,7 @@ import java.util.List;
 
 import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 
-// TODO: Distinguish repeated requests from new requests (maybe not necessary)
+// TODO: Add parse_request function that checks if received tuple has correct syntax
 public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaImplBase {
 
     // Server state implementation
