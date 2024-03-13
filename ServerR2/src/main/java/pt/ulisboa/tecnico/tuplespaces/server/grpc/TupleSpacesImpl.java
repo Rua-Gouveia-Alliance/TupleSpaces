@@ -24,7 +24,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
 
     private boolean tupleIsValid(String tuple) {
         // TODO is this enough?? and should we add try catches on the client-side??
-        return !tuple.startsWith(BGN_TUPLE) && !tuple.endsWith(END_TUPLE);
+        return tuple.startsWith(BGN_TUPLE) && tuple.endsWith(END_TUPLE);
     }
 
     @Override
