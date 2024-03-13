@@ -10,6 +10,8 @@ import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplic
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
@@ -83,68 +85,76 @@ public class ClientService {
         return collector.getResponses().get(0);
     }
 
-    public List<String> get_intersection(List<List<String>> lists) {
-        List<String> intersection = lists.get(0);
+    public String get_intersection(List<String> list) {
+        for (String tuple : list)
+            if (Collections.frequency(list, tuple) == 3)
+                return tuple;
 
-        for (int i = 1; i < lists.size(); i++) {
-            List<String> temp_intersection = new ArrayList<>();
-            for (String element : lists.get(i)) {
-                if (intersection.contains(element))
-                    temp_intersection.add(element);
-            }
-            intersection = temp_intersection;
-        }
-        return intersection;
+        return null;
     }
 
     public String take(String pattern) {
-        List<TakePhase1Response> responses;
-        List<List<String>> responses_strings;
-        List<String> intersection = new ArrayList<>();
-        long num_empties;
+        ArrayList<String> tuples = new ArrayList<>();
+        String intersection = null;
         do {
             // take phase 1 and convert responses to List<String>
-            responses = take_p1(pattern);
-            responses_strings = new ArrayList<>();
-            for (TakePhase1Response response : responses)
-                responses_strings.add(response.getReservedTuplesList());
+            ArrayList<Integer> empties = new ArrayList<>();
+            take_p1(pattern).forEach((id, r) -> {
+                if (r.getReservedTuplesCount() == 0)
+                    empties.add(id);
+                else
+                    tuples.addAll(r.getReservedTuplesList());
+            });
 
-            num_empties = responses_strings.stream().filter(List::isEmpty).count(); // number of empty responses
             // minority responded
-            if (num_empties > targets.size() / 2)
-                take_p1_release();
-            if (num_empties > 0)
+            if (empties.size() > targets.size() / 2)
+                take_p1_release(empties);
+            if (empties.size() > 0)
                 continue;
 
-            intersection = get_intersection(responses_strings);
-        } while (intersection.isEmpty());
+            intersection = get_intersection(tuples);
+        } while (intersection == null);
 
-        take_p2(intersection.get(0));
-        return intersection.get(0);
+        take_p2(intersection);
+        return intersection;
     }
 
-    public List<TakePhase1Response> take_p1(String pattern) {
-        debugMessage("Requesting take phase 1 operation to TupleSpaces Servers of patter: " + pattern);
-        TakePhase1Request request = TakePhase1Request.newBuilder().setSearchPattern(pattern).setClientId(
-                clientId).build();
-        ResponseCollector<TakePhase1Response> collector = new ResponseCollector<>();
-        for (Integer id : delayer)
+    private Hashtable<Integer, TakePhase1Response> take_p1(String pattern) {
+        debugMessage("Requesting take phase 1 operation to TupleSpaces Servers of pattern: " + pattern);
+        TakePhase1Request request = TakePhase1Request.newBuilder().setSearchPattern(pattern).setClientId(clientId)
+                .build();
+        ArrayList<ResponseCollector<TakePhase1Response>> collectors = new ArrayList<>();
+        for (Integer id : delayer) {
+            ResponseCollector<TakePhase1Response> collector = new ResponseCollector<>(id);
             stubs.get(id).takePhase1(request, new TupleSpacesObserver<>(collector));
-        collector.waitForAll();
-        return collector.getResponses();
+            collectors.add(collector);
+        }
+
+        Hashtable<Integer, TakePhase1Response> tagged_responses = new Hashtable<>();
+        for (ResponseCollector<TakePhase1Response> c : collectors) {
+            c.waitForFirst();
+            tagged_responses.put(c.getId(), c.getResponses().get(0));
+        }
+
+        return tagged_responses;
     }
 
-    public List<TakePhase1ReleaseResponse> take_p1_release() {
+    private ArrayList<TakePhase1ReleaseResponse> take_p1_release(ArrayList<Integer> empties) {
         debugMessage("Requesting take phase 1 release operation to TupleSpaces Servers");
         TakePhase1ReleaseRequest request = TakePhase1ReleaseRequest.newBuilder().setClientId(clientId).build();
         ResponseCollector<TakePhase1ReleaseResponse> collector = new ResponseCollector<>();
-        for (Integer id : delayer)
-            stubs.get(id).takePhase1Release(request, new TupleSpacesObserver<>(collector));
-        collector.waitForAll();
+
+        for (Integer id : delayer) {
+            if (!empties.contains(id)) {
+                stubs.get(id).takePhase1Release(request, new TupleSpacesObserver<>(collector));
+            }
+        }
+
+        collector.waitForCount(empties.size());
         return collector.getResponses();
     }
 
-    public List<TakePhase2Response> take_p2(String tuple) {
+    private ArrayList<TakePhase2Response> take_p2(String tuple) {
         debugMessage("Requesting take phase 2 operation to TupleSpaces Servers of tuple: " + tuple);
         TakePhase2Request request = TakePhase2Request.newBuilder().setTuple(tuple).setClientId(clientId).build();
         ResponseCollector<TakePhase2Response> collector = new ResponseCollector<>();
