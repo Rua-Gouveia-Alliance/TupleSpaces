@@ -7,10 +7,13 @@ import pt.ulisboa.tecnico.tuplespaces.server.domain.ServerState;
 
 import java.util.List;
 
+import static io.grpc.Status.INVALID_ARGUMENT;
 import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 
-// TODO: Add parse_request function that checks if received tuple has correct syntax
 public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaImplBase {
+
+    private static final String BGN_TUPLE = "<";
+    private static final String END_TUPLE = ">";
 
     // Server state implementation
     private final ServerState state;
@@ -19,11 +22,19 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         this.state = new ServerState();
     }
 
+    private boolean tupleIsValid(String tuple) {
+        // TODO is this enough?? and should we add try catches on the client-side??
+        return !tuple.startsWith(BGN_TUPLE) && !tuple.endsWith(END_TUPLE);
+    }
+
     @Override
     public void put(TupleSpacesReplicaXuLiskov.PutRequest request,
                     StreamObserver<TupleSpacesReplicaXuLiskov.PutResponse> responseObserver) {
         String newTuple = request.getNewTuple();
         debugMessage("Received put request for tuple " + newTuple);
+        if (!tupleIsValid(newTuple))
+            responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
+
         state.put(newTuple);
 
         // create and send response
@@ -40,7 +51,12 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         String pattern = request.getSearchPattern();
         debugMessage("Received read request of pattern " + pattern);
         String tuple = state.read(pattern);
-        if (tuple == null) tuple = "";
+        if (tuple == null) {
+            tuple = "";
+        } else {
+            if (!tupleIsValid(tuple))
+                responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
+        }
 
         // create and send response
         TupleSpacesReplicaXuLiskov.ReadResponse response = TupleSpacesReplicaXuLiskov.ReadResponse.newBuilder().setResult(
@@ -58,6 +74,9 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         String pattern = request.getSearchPattern();
         int clientId = request.getClientId();
         debugMessage("Received takePhase1 request of pattern " + pattern + "from client " + clientId);
+        if (!tupleIsValid(pattern))
+            responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
+
         List<String> tuples = state.takePhase1(pattern, clientId);
 
         // create and send response
@@ -90,6 +109,9 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         String tuple = request.getTuple();
         int clientId = request.getClientId();
         debugMessage("Received takePhase2 request of tuple " + tuple);
+        if (!tupleIsValid(tuple))
+            responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
+
         state.takePhase2(tuple, clientId);
 
         // create and send response
