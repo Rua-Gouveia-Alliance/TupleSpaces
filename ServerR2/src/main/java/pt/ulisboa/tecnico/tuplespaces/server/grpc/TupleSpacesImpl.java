@@ -32,8 +32,11 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
                     StreamObserver<TupleSpacesReplicaXuLiskov.PutResponse> responseObserver) {
         String newTuple = request.getNewTuple();
         debugMessage("Received put request for tuple " + newTuple);
-        if (!tupleIsValid(newTuple))
+
+        if (!tupleIsValid(newTuple)) {
             responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
+            return;
+        }
 
         state.put(newTuple);
 
@@ -54,8 +57,10 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         if (tuple == null) {
             tuple = "";
         } else {
-            if (!tupleIsValid(tuple))
+            if (!tupleIsValid(tuple)) {
                 responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
+                return;
+            }
         }
 
         // create and send response
@@ -74,8 +79,10 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         String pattern = request.getSearchPattern();
         int clientId = request.getClientId();
         debugMessage("Received takePhase1 request of pattern " + pattern + "from client " + clientId);
-        if (!tupleIsValid(pattern))
+        if (!tupleIsValid(pattern)) {
             responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
+            return;
+        }
 
         List<String> tuples = state.takePhase1(pattern, clientId);
 
@@ -109,9 +116,10 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         String tuple = request.getTuple();
         int clientId = request.getClientId();
         debugMessage("Received takePhase2 request of tuple " + tuple);
-        if (!tupleIsValid(tuple))
+        if (!tupleIsValid(tuple)) {
             responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
-
+            return;
+        }
         state.takePhase2(tuple, clientId);
 
         // create and send response
