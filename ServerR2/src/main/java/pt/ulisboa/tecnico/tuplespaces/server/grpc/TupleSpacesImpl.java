@@ -10,6 +10,7 @@ import java.util.List;
 
 import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 
+// TODO: Distinguish repeated requests from new requests (maybe not necessary)
 public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaImplBase {
 
     // Server state implementation
