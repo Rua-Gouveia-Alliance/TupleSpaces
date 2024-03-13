@@ -5,6 +5,7 @@ import pt.ulisboa.tecnico.tuplespaces.server.util.exception.TupleLockedException
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -13,45 +14,58 @@ import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 public class ServerState {
 
     private final List<Tuple> tuples;
-    private final ReadWriteLock lock;
+    private final ReentrantReadWriteLock lock;
+    private final Condition availableTuple;
 
     public ServerState() {
         this.tuples = new ArrayList<>();
         this.lock = new ReentrantReadWriteLock();
+        this.availableTuple = lock.writeLock().newCondition();
     }
 
-    public synchronized void put(String tuple) {
+    public void put(String tuple) {
         lock.writeLock().lock();
         try {
             tuples.add(new Tuple(tuple));
             debugMessage("Add tuple: " + tuple);
-            notifyAll();
+            availableTuple.signalAll();
         } finally {
             lock.writeLock().unlock();
         }
     }
 
     private String getMatchingTuple(String pattern) {
-        lock.readLock().lock();
-        try {
-            for (Tuple tuple : this.tuples) {
-                if (tuple.matches(pattern)) {
-                    debugMessage("Found tuple: " + tuple);
-                    return tuple.getTuple();
-                }
+        for (Tuple tuple : this.tuples) {
+            if (tuple.matches(pattern)) {
+                debugMessage("Found tuple: " + tuple);
+                return tuple.getTuple();
             }
-            debugMessage("Pattern %s not found", pattern);
-            return null;
-        } finally {
-            lock.readLock().unlock();
         }
+        debugMessage("Pattern %s not found", pattern);
+        return null;
     }
 
     public String read(String pattern) {
-        // TODO this should block if not found tuple, revert
         lock.readLock().lock();
         try {
-            return getMatchingTuple(pattern);
+            String tuple;
+            if ((tuple = getMatchingTuple(pattern)) == null) {
+                lock.readLock().unlock();
+                lock.writeLock().lock();
+                try {
+                    while ((tuple = getMatchingTuple(pattern)) == null) {
+                        try {
+                            availableTuple.await();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    lock.readLock().lock();
+                } finally {
+                    lock.writeLock().unlock();
+                }
+            }
+            return tuple;
         } finally {
             lock.readLock().unlock();
         }
