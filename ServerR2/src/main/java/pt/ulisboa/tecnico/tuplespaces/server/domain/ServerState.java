@@ -61,11 +61,11 @@ public class ServerState {
         debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
         lock.writeLock().lock();
         try {
-            List<String> stuples = new ArrayList<>();
+            ArrayList<String> stuples = new ArrayList<>();
             for (Tuple t : tuples) {
                 if (t.matches(pattern)) {
                     t.lock(clientId);
-                    if (!stuples.stream().anyMatch(t.getTuple())) {
+                    if (!stuples.contains(t.getTuple())) {
                         stuples.add(t.getTuple());
                     }
                 }
