@@ -25,7 +25,7 @@ public class ClientMain {
         if (args.length == 4 && !args[3].equals("-debug")) {
             return false;
         }
-        return checkPort(args[0]) && checkClientId(args[2]);
+        return checkPort(args[1]) && checkClientId(args[2]);
     }
 
     private static boolean checkPort(String s) {
