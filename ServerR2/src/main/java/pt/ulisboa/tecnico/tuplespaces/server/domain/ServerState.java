@@ -62,18 +62,16 @@ public class ServerState {
         lock.writeLock().lock();
         try {
             List<String> stuples = new ArrayList<>();
-            for (Tuple t : tuples) {
+            tuples.forEach(t -> {
                 if (t.matches(pattern)) {
-                    if (t.isLocked())
-                        // TODO should we unlock all locked until now????
-                        return new ArrayList<>();
                     t.lock(clientId);
                     stuples.add(t.getTuple());
                 }
-            }
+            });
             return stuples;
         } catch (TupleLockedException e) {
-            throw new RuntimeException(e);
+            releaseAll(clientId);
+            return new ArrayList<>();
         } finally {
             lock.writeLock().unlock();
         }
