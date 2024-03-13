@@ -1,7 +1,8 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
 import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
-import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.*;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.ReadResponse;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.getTupleSpacesStateResponse;
 
 import java.util.Scanner;
 

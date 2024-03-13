@@ -4,7 +4,6 @@ import io.grpc.stub.StreamObserver;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov;
 import pt.ulisboa.tecnico.tuplespaces.server.domain.ServerState;
-import static io.grpc.Status.NOT_FOUND;
 
 import java.util.List;
 
@@ -41,11 +40,8 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         String pattern = request.getSearchPattern();
         debugMessage("Received read request of pattern " + pattern);
         String tuple = state.read(pattern);
+        if (tuple == null) tuple = "";
 
-        if (tuple == null){
-            debugMessage("Sending exception NOT_FOUND of pattern " + pattern);
-            responseObserver.onError(NOT_FOUND.withDescription("Requested tuple was not found.").asRuntimeException());
-        }
         // create and send response
         TupleSpacesReplicaXuLiskov.ReadResponse response = TupleSpacesReplicaXuLiskov.ReadResponse.newBuilder().setResult(
                 tuple).build();
@@ -57,16 +53,16 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
 
     @Override
     public void takePhase1(TupleSpacesReplicaXuLiskov.TakePhase1Request request,
-                     StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase1Response> responseObserver) {
+                           StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase1Response> responseObserver) {
 
         String pattern = request.getSearchPattern();
-        Integer clientId = request.getClientId();
+        int clientId = request.getClientId();
         debugMessage("Received takePhase1 request of pattern " + pattern + "from client " + clientId);
         List<String> tuples = state.takePhase1(pattern, clientId);
 
         // create and send response
         TupleSpacesReplicaXuLiskov.TakePhase1Response response = TupleSpacesReplicaXuLiskov.TakePhase1Response
-            .newBuilder().addAllReservedTuples(tuples).build();
+                .newBuilder().addAllReservedTuples(tuples).build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -74,8 +70,8 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
 
     @Override
     public void takePhase1Release(TupleSpacesReplicaXuLiskov.TakePhase1ReleaseRequest request,
-                     StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase1ReleaseResponse> responseObserver) {
-        
+                                  StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase1ReleaseResponse> responseObserver) {
+
         int clientId = request.getClientId();
         debugMessage("Received takePhase1Release request of client " + clientId);
         state.takePhase1Release(clientId);
@@ -89,7 +85,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
 
     @Override
     public void takePhase2(TupleSpacesReplicaXuLiskov.TakePhase2Request request,
-                     StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase2Response> responseObserver) {
+                           StreamObserver<TupleSpacesReplicaXuLiskov.TakePhase2Response> responseObserver) {
 
         String tuple = request.getTuple();
         int clientId = request.getClientId();

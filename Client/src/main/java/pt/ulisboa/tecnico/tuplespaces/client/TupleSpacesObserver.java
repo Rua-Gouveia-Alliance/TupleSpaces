@@ -1,9 +1,9 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
-import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
-
 import io.grpc.stub.StreamObserver;
 import pt.ulisboa.tecnico.tuplespaces.client.util.ResponseCollector;
+
+import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
 public class TupleSpacesObserver<R> implements StreamObserver<R> {
 
@@ -21,7 +21,7 @@ public class TupleSpacesObserver<R> implements StreamObserver<R> {
 
     @Override
     public void onError(Throwable throwable) {
-        System.err.println("Received error: " + throwable);
+        debugMessage("Received error: " + throwable);
     }
 
     @Override

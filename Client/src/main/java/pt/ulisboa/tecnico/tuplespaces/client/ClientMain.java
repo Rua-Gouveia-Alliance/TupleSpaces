@@ -1,8 +1,5 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import pt.ulisboa.tecnico.nameserver.contract.NameServerGrpc;
@@ -11,9 +8,11 @@ import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.LookupRequest
 import pt.ulisboa.tecnico.nameserver.contract.NameServerOuterClass.LookupResponse;
 import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 public class ClientMain {
 
-    public static final int numServers = 3;
     private static final String SERVICE = "TupleSpaces";
     private static boolean DEBUG = false;
 
@@ -98,9 +97,9 @@ public class ClientMain {
         targets.add(lookupServer(target, "B"));
         targets.add(lookupServer(target, "C"));
 
-        // TODO: should we crash the client if not available A, B and C??
         if (targets.stream().anyMatch(Objects::isNull)) {
-            System.out.println("Exiting.");
+            System.out.println("Unable to find all replicas");
+            System.out.println("Exiting...");
             System.exit(0);
         }
 
