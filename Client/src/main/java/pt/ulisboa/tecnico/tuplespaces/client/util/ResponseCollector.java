@@ -12,8 +12,7 @@ public class ResponseCollector<R> {
         notifyAll();
     }
 
-    // TODO: Add timeouts, if it times out return false
-    public synchronized boolean waitForAll() {
+    public synchronized void waitForAll() {
         while (responses.size() < RESPONSE_COUNT) {
             try {
                 wait();
@@ -21,7 +20,6 @@ public class ResponseCollector<R> {
                 throw new RuntimeException(e);
             }
         }
-        return true;
     }
 
     public synchronized void incrementError() {
@@ -29,8 +27,7 @@ public class ResponseCollector<R> {
         notifyAll();
     }
 
-    // TODO: Add timeouts, if it times out return false
-    public synchronized boolean waitForFirst() {
+    public synchronized void waitForFirst() {
         while (responses.size() < 1) {
             try {
                 wait();
@@ -38,7 +35,6 @@ public class ResponseCollector<R> {
                 throw new RuntimeException(e);
             }
         }
-        return true;
     }
 
     public ArrayList<R> getResponses() {
