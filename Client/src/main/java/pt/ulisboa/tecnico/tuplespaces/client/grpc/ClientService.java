@@ -63,11 +63,10 @@ public class ClientService {
         ResponseCollector<PutResponse> collector = new ResponseCollector<>();
         TupleSpacesObserver<PutResponse> observer = new TupleSpacesObserver<>(collector);
 
-        do {
-            for (Integer id : delayer)
-                stubs.get(id).put(request, observer);
-        } while (!collector.waitForAll());
+        for (Integer id : delayer)
+            stubs.get(id).put(request, observer);
 
+        collector.waitForAll();
         return collector.getResponses().get(0);
     }
 
@@ -77,13 +76,11 @@ public class ClientService {
         ResponseCollector<ReadResponse> collector = new ResponseCollector<>();
         TupleSpacesObserver<ReadResponse> observer = new TupleSpacesObserver<>(collector);
 
-        do {
-            for (Integer id : delayer)
-                stubs.get(id).read(request, observer);
-        } while (!collector.waitForFirst()
-                && collector.getResponses().stream().anyMatch(r -> !r.getResult().isEmpty()));
+        for (Integer id : delayer)
+            stubs.get(id).read(request, observer);
 
-        return collector.getResponses().stream().filter(r -> !r.getResult().isEmpty()).findFirst().get();
+        collector.waitForFirst();
+        return collector.getResponses().get(0);
     }
 
     public List<String> get_intersection(List<List<String>> lists) {
@@ -164,10 +161,9 @@ public class ClientService {
         TupleSpacesObserver<getTupleSpacesStateResponse> observer = new TupleSpacesObserver<>(collector);
         TupleSpacesReplicaStub stub = stubs.get(targets.indexOf(qualifier));
 
-        do {
-            stub.getTupleSpacesState(request, observer);
-        } while (!collector.waitForFirst());
+        stub.getTupleSpacesState(request, observer);
 
+        collector.waitForFirst();
         return collector.getResponses().get(0);
     }
 
