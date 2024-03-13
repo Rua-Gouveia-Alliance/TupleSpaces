@@ -14,6 +14,7 @@ import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class ClientService {
 
@@ -36,12 +37,17 @@ public class ClientService {
             this.stubs.add(TupleSpacesReplicaGrpc.newStub(channel));
         });
 
-        /* The delayer can be used to inject delays to the sending of requests to the 
-        different servers, according to the per-server delays that have been set  */
+        /*
+         * The delayer can be used to inject delays to the sending of requests to the
+         * different servers, according to the per-server delays that have been set
+         */
         delayer = new OrderedDelayer(targets.size());
     }
 
-    /* This method allows the command processor to set the request delay assigned to a given server */
+    /*
+     * This method allows the command processor to set the request delay assigned to
+     * a given server
+     */
     public void setDelay(int id, int delay) {
         // TODO: should we disallow the usage of setDelay when not in debug mode??
         delayer.setDelay(id, delay);
@@ -53,16 +59,17 @@ public class ClientService {
         debugMessage("[Debug only]: Done.");
     }
 
-    /* Example: How to use the delayer before sending requests to each server
-     *          Before entering each iteration of this loop, the delayer has already 
-     *          slept for the delay associated with server indexed by 'id'.
-     *          id is in the range 0..(numServers-1).
-    
-        for (Integer id : delayer) {
-            //stub[id].some_remote_method(some_arguments);
-        }
-
-    */
+    /*
+     * Example: How to use the delayer before sending requests to each server
+     * Before entering each iteration of this loop, the delayer has already
+     * slept for the delay associated with server indexed by 'id'.
+     * id is in the range 0..(numServers-1).
+     *
+     * for (Integer id : delayer) {
+     * //stub[id].some_remote_method(some_arguments);
+     * }
+     *
+     */
 
     public PutResponse put(String tuple) {
         debugMessage("Requesting put operation to TupleSpaces Server of tuple: " + tuple);
@@ -87,9 +94,10 @@ public class ClientService {
         do {
             for (Integer id : delayer)
                 stubs.get(id).read(request, observer);
-        } while (!collector.waitForFirst());
+        } while (!collector.waitForFirst()
+                && collector.getResponses().stream().filter(r -> !r.getResult().isEmpty()).count() != 0);
 
-        return collector.getResponses().get(0);
+        return collector.getResponses().stream().filter(r -> !r.getResult().isEmpty()).findFirst().get();
     }
 
     public List<String> get_intersection(List<List<String>> lists) {
@@ -139,7 +147,8 @@ public class ClientService {
         ResponseCollector<TakePhase1Response> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase1(request, new TupleSpacesObserver<>(collector));
-        // TODO: what if a replica does not respond? should we repeat after a certain time?
+        // TODO: what if a replica does not respond? should we repeat after a certain
+        // time?
         collector.waitForAll();
         return collector.getResponses();
     }
@@ -150,7 +159,8 @@ public class ClientService {
         ResponseCollector<TakePhase1ReleaseResponse> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase1Release(request, new TupleSpacesObserver<>(collector));
-        // TODO: what if a replica does not respond? should we repeat after a certain time?
+        // TODO: what if a replica does not respond? should we repeat after a certain
+        // time?
         collector.waitForAll();
         return collector.getResponses();
     }
@@ -161,7 +171,8 @@ public class ClientService {
         ResponseCollector<TakePhase2Response> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase2(request, new TupleSpacesObserver<>(collector));
-        // TODO: what if a replica does not respond? should we repeat after a certain time?
+        // TODO: what if a replica does not respond? should we repeat after a certain
+        // time?
         collector.waitForAll();
         return collector.getResponses();
     }
