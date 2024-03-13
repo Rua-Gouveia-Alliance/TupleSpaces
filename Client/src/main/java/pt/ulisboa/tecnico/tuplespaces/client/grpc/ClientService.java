@@ -133,8 +133,6 @@ public class ClientService {
         ResponseCollector<TakePhase1Response> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase1(request, new TupleSpacesObserver<>(collector));
-        // TODO: what if a replica does not respond? should we repeat after a certain
-        // time?
         collector.waitForAll();
         return collector.getResponses();
     }
@@ -145,8 +143,6 @@ public class ClientService {
         ResponseCollector<TakePhase1ReleaseResponse> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase1Release(request, new TupleSpacesObserver<>(collector));
-        // TODO: what if a replica does not respond? should we repeat after a certain
-        // time?
         collector.waitForAll();
         return collector.getResponses();
     }
@@ -157,8 +153,6 @@ public class ClientService {
         ResponseCollector<TakePhase2Response> collector = new ResponseCollector<>();
         for (Integer id : delayer)
             stubs.get(id).takePhase2(request, new TupleSpacesObserver<>(collector));
-        // TODO: what if a replica does not respond? should we repeat after a certain
-        // time?
         collector.waitForAll();
         return collector.getResponses();
     }

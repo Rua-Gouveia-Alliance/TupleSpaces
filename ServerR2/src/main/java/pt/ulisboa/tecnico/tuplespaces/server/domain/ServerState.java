@@ -48,6 +48,7 @@ public class ServerState {
     }
 
     public String read(String pattern) {
+        // TODO this should block if not found tuple, revert
         lock.readLock().lock();
         try {
             return getMatchingTuple(pattern);

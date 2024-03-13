@@ -22,6 +22,9 @@ public class ClientMain {
     }
 
     private static boolean checkArguments(String[] args) {
+        if (args.length == 4 && !args[3].equals("-debug")) {
+            return false;
+        }
         return checkPort(args[0]) && checkClientId(args[2]);
     }
 
@@ -68,12 +71,13 @@ public class ClientMain {
 
     public static void main(String[] args) {
 
+        if (args.length == 4 && args[3].equals("-debug"))
+            DEBUG = true;
+
         // receive and print arguments
         debugMessage("Received %d arguments", args.length);
         for (int i = 0; i < args.length; i++) {
             debugMessage("arg[%d] = %s", i, args[i]);
-            if (args[i].equals("-debug"))
-                DEBUG = true;
         }
 
         if (args.length < 3 || args.length > 4) {
@@ -83,7 +87,8 @@ public class ClientMain {
         }
 
         if (!checkArguments(args)) {
-            System.err.println("Invalid arguments.");
+            System.err.println("Invalid arguments");
+            System.out.println("Exiting...");
             return;
         }
 
@@ -98,7 +103,7 @@ public class ClientMain {
         targets.add(lookupServer(target, "C"));
 
         if (targets.stream().anyMatch(Objects::isNull)) {
-            System.out.println("Unable to find all replicas");
+            System.err.println("Unable to find all replicas");
             System.out.println("Exiting...");
             System.exit(0);
         }
