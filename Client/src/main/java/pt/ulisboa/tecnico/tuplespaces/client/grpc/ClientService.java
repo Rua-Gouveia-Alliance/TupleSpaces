@@ -95,7 +95,7 @@ public class ClientService {
                 else
                     tuples.addAll(r.getReservedTuplesList());
             });
-            debugMessage("Emptie replicas: " + empties.toString());
+            debugMessage("Empty replicas: " + empties.toString());
             debugMessage("received tuples: " + tuples.toString());
 
             // minority responded
