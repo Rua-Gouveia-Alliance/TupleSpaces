@@ -53,7 +53,7 @@ public class ServerState {
             ArrayList<String> stuples = new ArrayList<>();
             for (Tuple t : tuples) {
                 if (t.matches(pattern)) {
-                    if (!t.isLocked()) {
+                    if (!t.isLocked() || t.getClientId() == clientId) {
                         t.lock(clientId);
                         if (!stuples.contains(t.getTuple())) {
                             stuples.add(t.getTuple());

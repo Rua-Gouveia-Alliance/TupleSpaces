@@ -84,17 +84,19 @@ public class ClientService {
     }
 
     public String take(String pattern) {
-        ArrayList<String> tuples = new ArrayList<>();
         String intersection = null;
         do {
             // take phase 1 and convert responses to List<String>
             ArrayList<Integer> empties = new ArrayList<>();
+            ArrayList<String> tuples = new ArrayList<>();
             take_p1(pattern).forEach((id, r) -> {
                 if (r.getReservedTuplesCount() == 0)
                     empties.add(id);
                 else
                     tuples.addAll(r.getReservedTuplesList());
             });
+            debugMessage("Emptie replicas: " + empties.toString());
+            debugMessage("received tuples: " + tuples.toString());
 
             // minority responded
             if (empties.size() > NUM_REPLICAS / 2) {
@@ -107,6 +109,7 @@ public class ClientService {
                 continue;
 
             intersection = get_intersection(tuples);
+            debugMessage("intersection: " + intersection);
         } while (intersection == null);
 
         take_p2(intersection);
@@ -128,6 +131,9 @@ public class ClientService {
         for (ResponseCollector<TakePhase1Response> c : collectors) {
             c.waitForFirst();
             tagged_responses.put(c.getId(), c.getResponses().get(0));
+            debugMessage(
+                    "Received response for take phase 1 of replica " + c.getId() + ", tuples: " + c.getResponses().get(
+                            0).getReservedTuplesList().toString());
         }
 
         return tagged_responses;
