@@ -15,7 +15,7 @@ public class ServerState {
 
     private final List<Tuple> tuples;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private final Condition cond = (new ReentrantLock()).newCondition();
+    private final Condition cond = lock.writeLock().newCondition();
 
     public ServerState() {
         this.tuples = new ArrayList<>();
@@ -42,7 +42,7 @@ public class ServerState {
                 lock.readLock().lock();
             }
             return tuple;
-        }catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
             lock.readLock().unlock();
