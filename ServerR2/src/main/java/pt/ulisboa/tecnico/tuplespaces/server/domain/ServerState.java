@@ -51,6 +51,12 @@ public class ServerState {
         debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
         ArrayList<String> stuples = new ArrayList<>();
         for (Tuple t : tuples) {
+            /*
+             * We only add a tuple to the response if it isn't repeated and locked by another client.
+             * This way, if we have two equal tuples and two equal requests, we can lock one tuple for each one,
+             * instead of locking two for only one client. Rejecting a request if we can't lock a matching tuple would
+             * make this optimization useless, so we opted to always answer the clients with all the tuples we can lock
+             */
             if (t.matches(pattern) && !stuples.contains(t.getTuple()) && !t.isLocked()) {
                 t.lock(clientId);
                 stuples.add(t.getTuple());
