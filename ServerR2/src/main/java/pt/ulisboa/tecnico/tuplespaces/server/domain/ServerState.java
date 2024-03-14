@@ -5,7 +5,8 @@ import pt.ulisboa.tecnico.tuplespaces.server.util.exception.TupleLockedException
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
@@ -14,7 +15,7 @@ public class ServerState {
 
     private final List<Tuple> tuples;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private final Condition cond = lock.newCondition();
+    private final Condition cond = (new ReentrantLock()).newCondition();
 
     public ServerState() {
         this.tuples = new ArrayList<>();
@@ -41,6 +42,8 @@ public class ServerState {
                 lock.readLock().lock();
             }
             return tuple;
+        }catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
             lock.readLock().unlock();
         }
