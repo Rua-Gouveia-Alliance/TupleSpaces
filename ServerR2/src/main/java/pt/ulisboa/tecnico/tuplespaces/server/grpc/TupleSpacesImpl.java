@@ -52,17 +52,16 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
                      StreamObserver<TupleSpacesReplicaXuLiskov.ReadResponse> responseObserver) {
         String pattern = request.getSearchPattern();
         debugMessage("Received read request of pattern " + pattern);
-        String tuple = state.read(pattern);
-        if (tuple == null) {
-            tuple = "";
-        } else {
-            if (!tupleIsValid(tuple)) {
+        if (!tupleIsValid(tuple)) {
+            debugMessage("Pattern " + pattern + " is not a valid format for a tuple");
                 responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
                 return;
-            }
         }
 
-        // create and send response
+        String tuple = state.read(pattern);
+        if (tuple == null)
+            tuple = "";
+
         TupleSpacesReplicaXuLiskov.ReadResponse response = TupleSpacesReplicaXuLiskov.ReadResponse.newBuilder().setResult(
                 tuple).build();
         debugMessage("Sending read response of tuple " + tuple);
