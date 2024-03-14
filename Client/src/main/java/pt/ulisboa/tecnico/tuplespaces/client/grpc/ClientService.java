@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Random;
 
 import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
@@ -84,32 +85,44 @@ public class ClientService {
     }
 
     public String take(String pattern) {
+        Random generator = new Random();
         String intersection = null;
+        int millis = 0;
+
         do {
             ArrayList<Integer> empties = new ArrayList<>();
             ArrayList<String> tuples = new ArrayList<>();
+
             // Sending the tuple template to all replicas
             take_p1(pattern).forEach((id, r) -> {
-                if (r.getReservedTuplesCount() == 0)
+                if (r.getReservedTuplesCount() == 0) {
                     empties.add(id);
-                else
+                } else {
                     tuples.addAll(r.getReservedTuplesList());
+                }
             });
             debugMessage("Empty replicas: " + empties.toString());
-            debugMessage("received tuples: " + tuples.toString());
+            debugMessage("Received tuples: " + tuples.toString());
 
             // Only a minority was able to return tuples
             if (empties.size() > NUM_REPLICAS / 2) {
                 take_p1_release(empties);
-                // TODO wait random time that increases each try
-                // https://moodle.dei.tecnico.ulisboa.pt/mod/forum/discuss.php?d=9411
+
+                // Increasingly bigger random wait time before repeating take phase 1
+                millis = generator.nextInt(1000) + millis;
+                debugMessage("Waiting for " + millis/1000 + " seconds before retrying phase 1");
+                try {
+                    Thread.sleep(millis);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             if (empties.size() > 0)
                 continue;
 
             intersection = get_intersection(tuples);
-            debugMessage("intersection: " + intersection);
+            debugMessage("Intersection: " + intersection);
         } while (intersection == null);
 
         take_p2(intersection);
