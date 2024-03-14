@@ -89,6 +89,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         // create and send response
         TupleSpacesReplicaXuLiskov.TakePhase1Response response = TupleSpacesReplicaXuLiskov.TakePhase1Response
                 .newBuilder().addAllReservedTuples(tuples).build();
+        debugMessage("Sending take phase 1 response of tuples " + tuples.toString());
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -104,6 +105,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
 
         // create and send response
         TupleSpacesReplicaXuLiskov.TakePhase1ReleaseResponse response = TupleSpacesReplicaXuLiskov.TakePhase1ReleaseResponse.getDefaultInstance();
+        debugMessage("Sending take phase 1 release response");
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -124,6 +126,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
 
         // create and send response
         TupleSpacesReplicaXuLiskov.TakePhase2Response response = TupleSpacesReplicaXuLiskov.TakePhase2Response.getDefaultInstance();
+        debugMessage("Sending take phase 2 response");
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

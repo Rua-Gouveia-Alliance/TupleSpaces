@@ -97,8 +97,12 @@ public class ClientService {
             });
 
             // minority responded
-            if (empties.size() > NUM_REPLICAS / 2)
+            if (empties.size() > NUM_REPLICAS / 2) {
                 take_p1_release(empties);
+                // TODO wait random time that increases each try
+                // https://moodle.dei.tecnico.ulisboa.pt/mod/forum/discuss.php?d=9411
+            }
+
             if (empties.size() > 0)
                 continue;
 
@@ -110,11 +114,11 @@ public class ClientService {
     }
 
     private Hashtable<Integer, TakePhase1Response> take_p1(String pattern) {
-        debugMessage("Requesting take phase 1 operation to TupleSpaces Servers of pattern: " + pattern);
         TakePhase1Request request = TakePhase1Request.newBuilder().setSearchPattern(pattern).setClientId(clientId)
                 .build();
         ArrayList<ResponseCollector<TakePhase1Response>> collectors = new ArrayList<>();
         for (Integer id : delayer) {
+            debugMessage("Requesting take phase 1 to replica " + id + " of pattern: " + pattern);
             ResponseCollector<TakePhase1Response> collector = new ResponseCollector<>(id);
             stubs.get(id).takePhase1(request, new TupleSpacesObserver<>(collector));
             collectors.add(collector);
@@ -130,26 +134,30 @@ public class ClientService {
     }
 
     private ArrayList<TakePhase1ReleaseResponse> take_p1_release(ArrayList<Integer> empties) {
-        debugMessage("Requesting take phase 1 release operation to TupleSpaces Servers");
         TakePhase1ReleaseRequest request = TakePhase1ReleaseRequest.newBuilder().setClientId(clientId).build();
         ResponseCollector<TakePhase1ReleaseResponse> collector = new ResponseCollector<>();
 
+        int count = 0;
         for (Integer id : delayer) {
             if (!empties.contains(id)) {
+                count++;
+                debugMessage(
+                        "Requesting take phase 1 release to replica " + id + " with clientId: " + clientId);
                 stubs.get(id).takePhase1Release(request, new TupleSpacesObserver<>(collector));
             }
         }
 
-        collector.waitForCount(empties.size());
+        collector.waitForCount(count);
         return collector.getResponses();
     }
 
     private ArrayList<TakePhase2Response> take_p2(String tuple) {
-        debugMessage("Requesting take phase 2 operation to TupleSpaces Servers of tuple: " + tuple);
         TakePhase2Request request = TakePhase2Request.newBuilder().setTuple(tuple).setClientId(clientId).build();
         ResponseCollector<TakePhase2Response> collector = new ResponseCollector<>();
-        for (Integer id : delayer)
+        for (Integer id : delayer) {
+            debugMessage("Requesting take phase 2 operation to replica " + id + " of tuple: " + tuple);
             stubs.get(id).takePhase2(request, new TupleSpacesObserver<>(collector));
+        }
         collector.waitForAll();
         return collector.getResponses();
     }

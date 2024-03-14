@@ -53,16 +53,17 @@ public class ServerState {
             ArrayList<String> stuples = new ArrayList<>();
             for (Tuple t : tuples) {
                 if (t.matches(pattern)) {
-                    t.lock(clientId);
-                    if (!stuples.contains(t.getTuple())) {
-                        stuples.add(t.getTuple());
+                    if (!t.isLocked()) {
+                        t.lock(clientId);
+                        if (!stuples.contains(t.getTuple())) {
+                            stuples.add(t.getTuple());
+                        }
                     }
                 }
             }
             return stuples;
         } catch (TupleLockedException e) {
-            releaseAll(clientId);
-            return new ArrayList<>();
+            throw new RuntimeException(e);
         }
     }
 
