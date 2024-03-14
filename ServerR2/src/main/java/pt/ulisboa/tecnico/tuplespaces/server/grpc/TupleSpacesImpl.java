@@ -33,7 +33,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
         debugMessage("Received put request for tuple " + newTuple);
 
         if (!tupleIsValid(newTuple)) {
-            debugMessage("Pattern " + pattern + " is not a valid format for a tuple");
+            debugMessage("Pattern " + newTuple + " is not a valid format for a tuple");
             responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
             return;
         }
@@ -53,7 +53,7 @@ public class TupleSpacesImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaIm
                      StreamObserver<TupleSpacesReplicaXuLiskov.ReadResponse> responseObserver) {
         String pattern = request.getSearchPattern();
         debugMessage("Received read request of pattern " + pattern);
-        if (!tupleIsValid(tuple)) {
+        if (!tupleIsValid(pattern)) {
             debugMessage("Pattern " + pattern + " is not a valid format for a tuple");
             responseObserver.onError(INVALID_ARGUMENT.withDescription("Invalid tuple format").asRuntimeException());
             return;
