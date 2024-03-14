@@ -16,10 +16,11 @@ public class Tuple {
         return clientId != -1;
     }
 
-    public void lock(int clientId) throws TupleLockedException {
+    public int lock(int clientId) {
         if (this.isLocked() && this.clientId != clientId)
-            throw new TupleLockedException("Tuple already locked by another user");
+            return -1;
         this.clientId = clientId;
+        return 0;
     }
 
     public void unlock() {
