@@ -109,8 +109,8 @@ public class ClientService {
                 take_p1_release(empties);
 
                 // Increasingly bigger random wait time before repeating take phase 1
-                millis = generator.nextInt(1000) + millis;
-                debugMessage("Waiting for " + millis/1000 + " seconds before retrying phase 1");
+                millis += generator.nextInt(1000);
+                debugMessage("Waiting for " + millis / 1000.0 + " seconds before retrying phase 1");
                 try {
                     Thread.sleep(millis);
                 } catch (InterruptedException e) {

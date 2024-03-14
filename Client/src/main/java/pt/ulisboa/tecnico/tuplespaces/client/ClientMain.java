@@ -83,13 +83,13 @@ public class ClientMain {
 
         if (args.length < 3 || args.length > 4) {
             System.err.println("Wrong number of arguments");
-            System.err.println("Usage: mvn exec:java -Dexec.args=<host> <port> <clientId> [-debug]");
+            System.err.println("Usage: mvn exec:java -Dexec.args=<hostNS> <portNS> <clientId> [-debug]");
             return;
         }
 
         if (!checkArguments(args)) {
             System.err.println("Invalid arguments");
-            System.err.println("Usage: mvn exec:java -Dexec.args=<host> <port> <clientId> [-debug]");
+            System.err.println("Usage: mvn exec:java -Dexec.args=<hostNS> <portNS> <clientId> [-debug]");
             System.out.println("Exiting...");
             return;
         }
