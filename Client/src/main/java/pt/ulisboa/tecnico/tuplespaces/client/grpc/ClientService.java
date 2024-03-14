@@ -48,14 +48,7 @@ public class ClientService {
      * a given server
      */
     public void setDelay(int id, int delay) {
-        // TODO: should we disallow the usage of setDelay when not in debug mode??
         delayer.setDelay(id, delay);
-
-        debugMessage("[Debug only]: After setting the delay, I'll test it");
-        for (Integer i : delayer) {
-            debugMessage("[Debug only]: Now I can send request to stub[" + i + "]");
-        }
-        debugMessage("[Debug only]: Done.");
     }
 
     public PutResponse put(String tuple) {
