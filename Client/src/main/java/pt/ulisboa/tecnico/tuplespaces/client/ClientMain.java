@@ -60,6 +60,7 @@ public class ClientMain {
         // finding the TupleSpace's server address
         LookupRequest request = LookupRequest.newBuilder().setService(SERVICE).setQualifier(qualifier).build();
         LookupResponse response = stub.lookup(request);
+        channel.shutdown();
         // checking if name server found any server providing the desired service
         if (response.getServersCount() == 0) {
             debugMessage("No server with qualifier %s providing the desired service at the moment", qualifier);
