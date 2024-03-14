@@ -18,14 +18,13 @@ import static pt.ulisboa.tecnico.tuplespaces.client.ClientMain.debugMessage;
 
 public class ClientService {
 
-    private final ArrayList<String> targets;
+    private final int NUM_REPLICAS = 3;
     private final ArrayList<ManagedChannel> channels;
     private final ArrayList<TupleSpacesReplicaStub> stubs;
     private final OrderedDelayer delayer;
     private final int clientId;
 
     public ClientService(ArrayList<String> targets, int clientId) {
-        this.targets = targets;
         channels = new ArrayList<>();
         stubs = new ArrayList<>();
         this.clientId = clientId;
@@ -85,7 +84,7 @@ public class ClientService {
 
     public String get_intersection(List<String> list) {
         for (String tuple : list)
-            if (Collections.frequency(list, tuple) == 3)
+            if (Collections.frequency(list, tuple) == NUM_REPLICAS)
                 return tuple;
 
         return null;
@@ -105,7 +104,7 @@ public class ClientService {
             });
 
             // minority responded
-            if (empties.size() > targets.size() / 2)
+            if (empties.size() > NUM_REPLICAS / 2)
                 take_p1_release(empties);
             if (empties.size() > 0)
                 continue;
@@ -162,12 +161,12 @@ public class ClientService {
         return collector.getResponses();
     }
 
-    public getTupleSpacesStateResponse getTupleSpacesState(String qualifier) {
-        debugMessage("Requesting getTupleSpacesState operation to TupleSpaces Server replica: " + qualifier);
+    public getTupleSpacesStateResponse getTupleSpacesState(int indexServerQualifier) {
+        debugMessage("Requesting getTupleSpacesState to TupleSpaces Server replica w/ index: " + indexServerQualifier);
         getTupleSpacesStateRequest request = getTupleSpacesStateRequest.getDefaultInstance();
         ResponseCollector<getTupleSpacesStateResponse> collector = new ResponseCollector<>();
         TupleSpacesObserver<getTupleSpacesStateResponse> observer = new TupleSpacesObserver<>(collector);
-        TupleSpacesReplicaStub stub = stubs.get(targets.indexOf(qualifier));
+        TupleSpacesReplicaStub stub = stubs.get(indexServerQualifier);
 
         stub.getTupleSpacesState(request, observer);
 

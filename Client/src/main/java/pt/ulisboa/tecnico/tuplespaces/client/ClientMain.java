@@ -114,7 +114,7 @@ public class ClientMain {
             CommandProcessor parser = new CommandProcessor(new ClientService(targets, clientId));
             parser.parseInput();
         } catch (RuntimeException e) {
-            System.err.println("Connection to server failed, exiting...");
+            System.err.println("Connection to server failed, exiting...\n" + e.toString());
         }
         System.exit(0);
     }
