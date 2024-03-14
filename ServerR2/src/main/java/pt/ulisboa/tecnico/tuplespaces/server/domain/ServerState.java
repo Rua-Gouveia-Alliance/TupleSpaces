@@ -50,19 +50,27 @@ public class ServerState {
     public synchronized List<String> takePhase1(String pattern, int clientId) {
         debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
         try {
-            ArrayList<String> stuples = new ArrayList<>();
-            for (Tuple t : tuples) {
-                if (t.matches(pattern)) {
-                    if (!t.isLocked() || t.getClientId() == clientId) {
-                        t.lock(clientId);
-                        if (!stuples.contains(t.getTuple())) {
-                            stuples.add(t.getTuple());
+            ArrayList<String> stuples;
+            boolean found;
+            for (; ; ) {
+                found = false;
+                stuples = new ArrayList<>();
+                for (Tuple t : tuples) {
+                    if (t.matches(pattern)) {
+                        found = true;
+                        if (!t.isLocked() || t.getClientId() == clientId) {
+                            if (!stuples.contains(t.getTuple())) {
+                                t.lock(clientId);
+                                stuples.add(t.getTuple());
+                            }
                         }
                     }
                 }
+                if (found) break;
+                wait();
             }
             return stuples;
-        } catch (TupleLockedException e) {
+        } catch (TupleLockedException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
