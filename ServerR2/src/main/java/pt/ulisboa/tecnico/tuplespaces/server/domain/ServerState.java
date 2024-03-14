@@ -14,41 +14,28 @@ import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 public class ServerState {
 
     private final List<Tuple> tuples;
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private final Condition cond = lock.writeLock().newCondition();
 
     public ServerState() {
         this.tuples = new ArrayList<>();
     }
 
-    public void put(String tuple) {
-        lock.writeLock().lock();
-        try {
-            tuples.add(new Tuple(tuple));
-            debugMessage("Add tuple: " + tuple);
-            cond.signal();
-        } finally {
-            lock.writeLock().unlock();
-        }
+    public synchronized void put(String tuple) {
+        tuples.add(new Tuple(tuple));
+        debugMessage("Add tuple: " + tuple);
+        notifyAll();
     }
 
-    public String read(String pattern) {
-        lock.readLock().lock();
-        try {
-            String tuple;
-            while ((tuple = getMatchingTuple(pattern)) == null) {
-                lock.readLock().unlock();
-                cond.await();
-                lock.readLock().lock();
+    public synchronized String read(String pattern) {
+        String tuple;
+        while ((tuple = getMatchingTuple(pattern)) == null) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-            return tuple;
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            lock.readLock().unlock();
         }
+        return tuple;
     }
-
 
     /*
      * We only add a tuple to the response if it isn't repeated and locked by another client.
@@ -56,51 +43,45 @@ public class ServerState {
      * instead of locking two for only one client. Rejecting a request if we can't lock a matching tuple would
      * make this optimization useless, so we opted to always answer the clients with all the tuples we can lock
      */
-    public List<String> takePhase1(String pattern, int clientId) {
-        lock.writeLock().lock();
+    public synchronized List<String> takePhase1(String pattern, int clientId) {
+        debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
         try {
-            debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
-            ArrayList<String> stuples = new ArrayList<>();
-            for (Tuple t : tuples) {
-                if (t.matches(pattern) && !stuples.contains(t.getTuple()) && !t.isLocked()) {
-                    t.lock(clientId);
-                    stuples.add(t.getTuple());
+            ArrayList<String> stuples;
+            boolean found;
+            for (; ; ) {
+                found = false;
+                stuples = new ArrayList<>();
+                for (Tuple t : tuples) {
+                    if (t.matches(pattern)) {
+                        found = true;
+                        if ((!t.isLocked() || t.getClientId() == clientId) && !stuples.contains(t.getTuple())) {
+                            t.lock(clientId);
+                            stuples.add(t.getTuple());
+                        }
+                    }
                 }
+                if (found) break;
+                wait();
             }
             return stuples;
-        } finally {
-            lock.writeLock().unlock();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void takePhase1Release(int clientId) {
-        lock.writeLock().lock();
-        try {
-            debugMessage("Take Phase 1 Release. clientId: " + clientId);
-            releaseAll(clientId);
-        } finally {
-            lock.writeLock().unlock();
-        }
+    public synchronized void takePhase1Release(int clientId) {
+        debugMessage("Take Phase 1 Release. clientId: " + clientId);
+        releaseAll(clientId);
     }
 
-    public void takePhase2(String tuple, int clientId) {
-        lock.writeLock().lock();
-        try {
-            debugMessage("Take Phase 2. Tuple: " + tuple + ", clientId: " + clientId);
-            removeTuple(tuple, clientId);
-            releaseAll(clientId);
-        } finally {
-            lock.writeLock().unlock();
-        }
+    public synchronized void takePhase2(String tuple, int clientId) {
+        debugMessage("Take Phase 2. Tuple: " + tuple + ", clientId: " + clientId);
+        removeTuple(tuple, clientId);
+        releaseAll(clientId);
     }
 
-    public List<String> getTupleSpacesState() {
-        lock.readLock().lock();
-        try{
-            return getAllTuples();
-        } finally {
-            lock.readLock().unlock();
-        }
+    public synchronized List<String> getTupleSpacesState() {
+        return getAllTuples();
     }
 
     private String getMatchingTuple(String pattern) {
