@@ -19,7 +19,6 @@ public class TupleSpacesObserver<R> implements StreamObserver<R> {
         collector.collect(r);
     }
 
-    // FIXME: client crashes when this is executed (server calls observer.onError, client stops working)
     @Override
     public void onError(Throwable throwable) {
         debugMessage("Received error: " + throwable);
