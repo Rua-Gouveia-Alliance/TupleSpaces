@@ -86,9 +86,9 @@ public class ClientService {
     public String take(String pattern) {
         String intersection = null;
         do {
-            // take phase 1 and convert responses to List<String>
             ArrayList<Integer> empties = new ArrayList<>();
             ArrayList<String> tuples = new ArrayList<>();
+            // Sending the tuple template to all replicas
             take_p1(pattern).forEach((id, r) -> {
                 if (r.getReservedTuplesCount() == 0)
                     empties.add(id);
@@ -98,7 +98,7 @@ public class ClientService {
             debugMessage("Empty replicas: " + empties.toString());
             debugMessage("received tuples: " + tuples.toString());
 
-            // minority responded
+            // Only a minority was able to return tuples
             if (empties.size() > NUM_REPLICAS / 2) {
                 take_p1_release(empties);
                 // TODO wait random time that increases each try
@@ -119,24 +119,13 @@ public class ClientService {
     private Hashtable<Integer, TakePhase1Response> take_p1(String pattern) {
         TakePhase1Request request = TakePhase1Request.newBuilder().setSearchPattern(pattern).setClientId(clientId)
                 .build();
-        ArrayList<ResponseCollector<TakePhase1Response>> collectors = new ArrayList<>();
+        ResponseCollector<TakePhase1Response> collector = new ResponseCollector<>();
         for (Integer id : delayer) {
             debugMessage("Requesting take phase 1 to replica " + id + " of pattern: " + pattern);
-            ResponseCollector<TakePhase1Response> collector = new ResponseCollector<>(id);
-            stubs.get(id).takePhase1(request, new TupleSpacesObserver<>(collector));
-            collectors.add(collector);
+            stubs.get(id).takePhase1(request, new TupleSpacesObserver<>(collector, id));
         }
-
-        Hashtable<Integer, TakePhase1Response> tagged_responses = new Hashtable<>();
-        for (ResponseCollector<TakePhase1Response> c : collectors) {
-            c.waitForFirst();
-            tagged_responses.put(c.getId(), c.getResponses().get(0));
-            debugMessage(
-                    "Received response for take phase 1 of replica " + c.getId() + ", tuples: " + c.getResponses().get(
-                            0).getReservedTuplesList().toString());
-        }
-
-        return tagged_responses;
+        collector.waitForAll();
+        return collector.getTaggedResponses();
     }
 
     private ArrayList<TakePhase1ReleaseResponse> take_p1_release(ArrayList<Integer> empties) {
