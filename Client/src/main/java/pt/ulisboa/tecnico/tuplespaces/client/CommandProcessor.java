@@ -186,6 +186,8 @@ public class CommandProcessor {
         }
 
         this.clientService.setDelay(qualifier, time);
+        System.out.println();
+        System.out.println();
     }
 
     private void printUsage() {
