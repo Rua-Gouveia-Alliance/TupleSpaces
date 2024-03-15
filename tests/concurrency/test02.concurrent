@@ -1,5 +1,5 @@
 put <vaga,sd,turno1>
-setdelay C 2
-setdelay B 2
+setdelay A 1
+setdelay B 1
 take <vaga,sd,turno1>
 exit

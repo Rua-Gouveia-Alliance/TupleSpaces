@@ -1,3 +1,3 @@
-setdelay A 1
+setdelay C 10
 take <vaga,sd,turno1>
 exit
