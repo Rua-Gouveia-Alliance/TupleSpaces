@@ -104,7 +104,7 @@ public class ClientService {
             debugMessage("Empty replicas: " + empties.toString());
             debugMessage("Received tuples: " + tuples.toString());
 
-            // Only a minority was able to return tuples
+            // Only a minority was able to accept the request
             if (empties.size() > NUM_REPLICAS / 2) {
                 take_p1_release(empties);
 
@@ -119,7 +119,7 @@ public class ClientService {
             }
 
             if (empties.size() > 0)
-                continue;
+                continue; // No need to check the intersection since it will be null
 
             intersection = get_intersection(tuples);
             debugMessage("Intersection: " + intersection);
