@@ -144,5 +144,6 @@ buildNumber.properties
 /.venv/
 /NameServer/NameServer.iml
 /NameServer/__pycache__/
-/tests/test-outputs/
+/tests/standard/test-outputs/
+/tests/concurrency/test-outputs/
 /NameServer/exceptions/__pycache__/
