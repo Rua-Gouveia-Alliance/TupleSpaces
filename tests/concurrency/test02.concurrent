@@ -1,0 +1,5 @@
+put <vaga,sd,turno1>
+setdelay C 2
+setdelay B 2
+take <vaga,sd,turno1>
+exit

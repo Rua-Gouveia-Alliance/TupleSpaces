@@ -1,0 +1,3 @@
+setdelay A 1
+take <vaga,sd,turno1>
+exit
