@@ -40,17 +40,28 @@ public class ServerState {
     public synchronized ArrayList<String> takePhase1(String pattern, int clientId) {
         debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
         ArrayList<String> stuples = new ArrayList<>();
-        for (Tuple t : tuples) {
-            if (t.matches(pattern)) {
-                // We don't care about repeated tuples
-                if (!stuples.contains(t.getTuple())) {
-                    if (t.canBeLocked(clientId)) {
-                        stuples.add(t.getTuple());
-                        t.lock(clientId);
-                    } else {
-                        // Tuple exists but can't be locked, we must reject this request
-                        return new ArrayList<>();
+        boolean found = false;
+        while (!found) {
+            for (Tuple t : tuples) {
+                if (t.matches(pattern)) {
+                    found = true;
+                    // We don't care about repeated tuples
+                    if (!stuples.contains(t.getTuple())) {
+                        if (t.canBeLocked(clientId)) {
+                            stuples.add(t.getTuple());
+                            t.lock(clientId);
+                        } else {
+                            // Tuple exists but can't be locked, we must reject this request
+                            return new ArrayList<>();
+                        }
                     }
+                }
+            }
+            if (!found) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
