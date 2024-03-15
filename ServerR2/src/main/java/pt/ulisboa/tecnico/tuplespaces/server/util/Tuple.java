@@ -17,7 +17,7 @@ public class Tuple {
     }
 
     public int lock(int clientId) {
-        if (this.isLocked() && this.clientId != clientId)
+        if (!this.canBeLocked(clientId))
             return -1;
         this.clientId = clientId;
         return 0;
@@ -39,4 +39,7 @@ public class Tuple {
         return this.tuple.matches(pattern);
     }
 
+    public boolean canBeLocked(int clientId) {
+        return !this.isLocked() || this.clientId == clientId;
+    }
 }

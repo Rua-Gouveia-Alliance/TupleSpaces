@@ -37,36 +37,24 @@ public class ServerState {
         return tuple;
     }
 
-    /*
-     * We only add a tuple to the response if it isn't repeated and locked by another client.
-     * This way, if we have two equal tuples and two equal requests, we can lock one tuple for each one,
-     * instead of locking two for only one client. Rejecting a request if we can't lock a matching tuple would
-     * make this optimization useless, so we opted to always answer the clients with all the tuples we can lock
-     */
-    public synchronized List<String> takePhase1(String pattern, int clientId) {
+    public synchronized ArrayList<String> takePhase1(String pattern, int clientId) {
         debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
-        try {
-            ArrayList<String> stuples;
-            boolean found;
-            for (; ; ) {
-                found = false;
-                stuples = new ArrayList<>();
-                for (Tuple t : tuples) {
-                    if (t.matches(pattern)) {
-                        found = true;
-                        if ((!t.isLocked() || t.getClientId() == clientId) && !stuples.contains(t.getTuple())) {
-                            t.lock(clientId);
-                            stuples.add(t.getTuple());
-                        }
+        ArrayList<String> stuples = new ArrayList<>();
+        for (Tuple t : tuples) {
+            if (t.matches(pattern)) {
+                // We don't care about repeated tuples
+                if (!stuples.contains(t.getTuple())) {
+                    if (t.canBeLocked(clientId)) {
+                        stuples.add(t.getTuple());
+                        t.lock(clientId);
+                    } else {
+                        // Tuple exists but can't be locked, we must reject this request
+                        return new ArrayList<>();
                     }
                 }
-                if (found) break;
-                wait();
             }
-            return stuples;
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
+        return stuples;
     }
 
     public synchronized void takePhase1Release(int clientId) {
