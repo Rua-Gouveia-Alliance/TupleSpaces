@@ -98,7 +98,7 @@ python server.py [-debug]
 ```
 
 To run three servers at the same time, run, in different terminals, in the ServerR2 directory, these commands, each with different port and 
-qualifier:
+qualifier (qualifiers should specifically be A, B, C):
 
 ```s
 mvn clean compile
