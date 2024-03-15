@@ -94,21 +94,22 @@ mvn install exec:exec
 In the NameServer directory:
 
 ```s
-python server.py
+python server.py [-debug]
 ```
 
-In the ServerR1 directory:
+To run three servers at the same time, run, in different terminals, in the ServerR2 directory, these commands, each with different port and 
+qualifier:
 
 ```s
 mvn clean compile
 mvn exec:java -Dexec.args="<port> <qualifier> [-debug]"
 ```
 
-In the Client directory:
+In the Client directory (NS stands for Name Server):
 
 ```s
 mvn clean compile
-mvn exec:java -Dexec.args="[qualifier] [-debug]"
+mvn exec:java -Dexec.args="<hostNS> <portNS> <clientId> [-debug]"
 ```
 
 ## Built With
