@@ -25,18 +25,16 @@ public class ClientMain {
         if (args.length == 4 && !args[3].equals("-debug")) {
             return false;
         }
-        return checkPort(args[1]) && checkClientId(args[2]);
+        return checkPorts(args[1], args[2]);
     }
 
-    private static boolean checkPort(String s) {
-        int d = isNumeric(s);
-        if (d == -1)
+    private static boolean checkPorts(String NSPort, String SeqPort) {
+        int ns = isNumeric(NSPort);
+        int seq = isNumeric(SeqPort);
+        if (ns == -1 || seq == -1 || ns == seq)
             return false;
-        return (d >= 1024 && d <= 65535); // check for invalid port numbers
-    }
-
-    private static boolean checkClientId(String s) {
-        return isNumeric(s) != -1;
+        
+        return (ns >= 1024 && ns <= 65535) && (seq >= 1024 && seq <= 65535); // check for invalid port numbers
     }
 
     private static int isNumeric(String s) {
@@ -83,21 +81,22 @@ public class ClientMain {
 
         if (args.length < 3 || args.length > 4) {
             System.err.println("Wrong number of arguments");
-            System.err.println("Usage: mvn exec:java -Dexec.args=<hostNS> <portNS> <clientId> [-debug]");
+            System.err.println("Usage: mvn exec:java -Dexec.args=<hostNS> <portNS> <portSeq> [-debug]");
             return;
         }
 
         if (!checkArguments(args)) {
             System.err.println("Invalid arguments");
-            System.err.println("Usage: mvn exec:java -Dexec.args=<hostNS> <portNS> <clientId> [-debug]");
+            System.err.println("Usage: mvn exec:java -Dexec.args=<hostNS> <portNS> <portSeq> [-debug]");
             System.out.println("Exiting...");
             return;
         }
 
         String host = args[0];
         String port = args[1];
-        int clientId = Integer.parseInt(args[2]);
+        String portSeq = args[2];
         String target = host + ":" + port;
+        String seqTarget = "localhost:" + portSeq;
 
         ArrayList<String> targets = new ArrayList<>();
         targets.add(lookupServer(target, "A"));
@@ -111,7 +110,7 @@ public class ClientMain {
         }
 
         try {
-            CommandProcessor parser = new CommandProcessor(new ClientService(targets, clientId));
+            CommandProcessor parser = new CommandProcessor(new ClientService(targets, seqTarget));
             parser.parseInput();
         } catch (RuntimeException e) {
             System.err.println("Connection to server failed, exiting...\n" + e.toString());

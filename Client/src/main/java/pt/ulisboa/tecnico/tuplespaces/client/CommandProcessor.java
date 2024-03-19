@@ -1,8 +1,10 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
 import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
-import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.ReadResponse;
-import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.getTupleSpacesStateResponse;
+
+import pt.ulisboa.tecnico.tuplespaces.replicaTotalOrder.contract.TupleSpacesReplicaTotalOrder.*;
+import pt.ulisboa.tecnico.tuplespaces.replicaTotalOrder.contract.TupleSpacesReplicaGrpc;
+import pt.ulisboa.tecnico.tuplespaces.replicaTotalOrder.contract.TupleSpacesReplicaGrpc.*;
 
 import java.util.Scanner;
 
@@ -103,11 +105,11 @@ public class CommandProcessor {
         String pattern = split[1];
 
         // read the tuple
-        ReadResponse response = clientService.read(pattern);
+        String response = clientService.read(pattern);
         System.out.println("OK");
-        System.out.println(response.getResult());
+        System.out.println(response);
         System.out.println();
-        debugMessage("Read tuple %s from TupleSpaces server", pattern);
+        debugMessage("Read tuple %s from TupleSpaces server", response);
     }
 
     private void take(String[] split) {
@@ -124,7 +126,7 @@ public class CommandProcessor {
         System.out.println("OK");
         System.out.println(response);
         System.out.println();
-        debugMessage("Took tuple %s from TupleSpaces server", pattern);
+        debugMessage("Took tuple %s from TupleSpaces server", response);
     }
 
     private void getTupleSpacesState(String[] split) {
