@@ -23,7 +23,7 @@ public class ServerState {
         this.waitingTuples = new ArrayList<>();
         this.lock = new ReentrantLock();
         this.condSeq = this.lock.newCondition();
-        this.seqCounter = 0;
+        this.seqCounter = 1;
     }
 
     public void put(String tuple, int seqNumber) {
@@ -42,14 +42,13 @@ public class ServerState {
             // increment seqCounter
             this.seqCounter++;
 
-            // actual put
-            tuples.add(tuple);
-            debugMessage("Add tuple: " + tuple);
-
             // notify waiting take specifically
-            if (!notifyTake(tuple))
+            if (!notifyTake(tuple)) {
+                tuples.add(tuple);      // actual put
+                debugMessage("Add tuple: " + tuple);
                 condSeq.signalAll();
-            ;
+            }
+
         } finally {
             this.lock.unlock();
         }

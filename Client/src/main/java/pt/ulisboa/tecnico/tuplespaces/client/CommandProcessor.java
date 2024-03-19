@@ -106,9 +106,12 @@ public class CommandProcessor {
 
         // read the tuple
         String response = clientService.read(pattern);
-        System.out.println("OK");
-        System.out.println(response);
-        System.out.println();
+        if (response.equals("")) System.out.println("NO TUPLE FOUND\n");
+        else {
+            System.out.println("OK");
+            System.out.println(response);
+            System.out.println();
+        }
         debugMessage("Read tuple %s from TupleSpaces server", response);
     }
 
