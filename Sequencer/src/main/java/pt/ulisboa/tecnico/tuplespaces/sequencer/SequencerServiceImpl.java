@@ -9,19 +9,20 @@ import java.util.List;
 
 public class SequencerServiceImpl extends SequencerImplBase {
 
-	int seqNumber;
+    int seqNumber;
 
-	public SequencerServiceImpl() {
-		seqNumber = 0;
-	}
+    public SequencerServiceImpl() {
+        seqNumber = 0;
+    }
 
-	@Override
-	synchronized public void getSeqNumber(GetSeqNumberRequest request, StreamObserver<GetSeqNumberResponse> responseObserver) {
-		seqNumber ++;
-		GetSeqNumberResponse response = GetSeqNumberResponse.newBuilder()
-				.setSeqNumber(seqNumber).build();
-		responseObserver.onNext(response);
-		responseObserver.onCompleted();
-	}
+    @Override
+    synchronized public void getSeqNumber(GetSeqNumberRequest request,
+            StreamObserver<GetSeqNumberResponse> responseObserver) {
+        seqNumber++;
+        GetSeqNumberResponse response = GetSeqNumberResponse.newBuilder()
+                .setSeqNumber(seqNumber).build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 
 }
