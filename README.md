@@ -88,7 +88,7 @@ python -m pip install grpcio-tools
 In the Contract directory:
 
 ```s
-mvn install exec:exec
+mvn clean install exec:exec
 ```
 
 In the NameServer directory:
@@ -97,8 +97,14 @@ In the NameServer directory:
 python server.py [-debug]
 ```
 
-To run three servers at the same time, run, in different terminals, in the ServerR2 directory, these commands, each with different port and 
-qualifier (qualifiers should specifically be A, B, C):
+In the Sequencer directory:
+
+```s
+mvn clean compile
+mvn exec:java -Dexec.args="<portSeq>"
+```
+
+To run three servers at the same time, run, in different terminals, in the ServerR3 directory, these commands, each with different port and qualifier (qualifiers should specifically be A, B, C):
 
 ```s
 mvn clean compile
