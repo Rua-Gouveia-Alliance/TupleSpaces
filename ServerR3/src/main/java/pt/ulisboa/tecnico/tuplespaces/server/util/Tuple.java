@@ -1,45 +1,36 @@
 package pt.ulisboa.tecnico.tuplespaces.server.util;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+
 import pt.ulisboa.tecnico.tuplespaces.server.util.exception.TupleLockedException;
 
 public class Tuple {
 
-    private final String tuple;
-    private int clientId;
+    private final String pattern;
+    private Condition cond;
+    private String tuple;
 
-    public Tuple (String tuple) {
-        this.tuple = tuple;
-        this.clientId = -1;
+    public Tuple(String pattern, Lock lock) {
+        this.pattern = pattern;
+        this.cond = lock.newCondition();
+        this.tuple = null;
     }
 
-    public boolean isLocked() {
-        return clientId != -1;
+    public String getPattern() {
+        return this.pattern;
     }
 
-    public int lock(int clientId) {
-        if (!this.canBeLocked(clientId))
-            return -1;
-        this.clientId = clientId;
-        return 0;
+    public Condition getCond() {
+        return this.cond;
     }
 
-    public void unlock() {
-        this.clientId = -1;
-    }
-
-    public int getClientId() {
-        return this.clientId;
-    }
-
-    public String getTuple()  {
+    public String getTuple() {
         return this.tuple;
     }
 
-    public boolean matches(String pattern) {
-        return this.tuple.matches(pattern);
+    public void setTuple(String tuple) {
+        this.tuple = tuple;
     }
 
-    public boolean canBeLocked(int clientId) {
-        return !this.isLocked() || this.clientId == clientId;
-    }
 }

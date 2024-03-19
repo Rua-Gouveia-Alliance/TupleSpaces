@@ -1,120 +1,143 @@
 package pt.ulisboa.tecnico.tuplespaces.server.domain;
 
 import pt.ulisboa.tecnico.tuplespaces.server.util.Tuple;
-import pt.ulisboa.tecnico.tuplespaces.server.util.exception.TupleLockedException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static pt.ulisboa.tecnico.tuplespaces.server.ServerMain.debugMessage;
 
 public class ServerState {
 
-    private final List<Tuple> tuples;
+    private final List<String> tuples;
+    private int seqCounter;
+    private Condition condSeq;
+    private List<Tuple> waitingTuples;
+    private Lock lock;
 
     public ServerState() {
         this.tuples = new ArrayList<>();
+        this.waitingTuples = new ArrayList<>();
+        this.lock = new ReentrantLock();
+        this.condSeq = this.lock.newCondition();
+        this.seqCounter = 0;
     }
 
-    public synchronized void put(String tuple) {
-        tuples.add(new Tuple(tuple));
-        debugMessage("Add tuple: " + tuple);
-        notifyAll();
-    }
+    public void put(String tuple, int seqNumber) {
+        this.lock.lock();
 
-    public synchronized String read(String pattern) {
-        String tuple;
-        while ((tuple = getMatchingTuple(pattern)) == null) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return tuple;
-    }
-
-    public synchronized ArrayList<String> takePhase1(String pattern, int clientId) {
-        debugMessage("Take Phase 1. Pattern: " + pattern + ", clientId: " + clientId);
-        ArrayList<String> stuples = new ArrayList<>();
-        boolean found = false;
-        while (!found) {
-            for (Tuple t : tuples) {
-                if (t.matches(pattern)) {
-                    found = true;
-                    // We don't care about repeated tuples
-                    if (!stuples.contains(t.getTuple())) {
-                        if (t.canBeLocked(clientId)) {
-                            stuples.add(t.getTuple());
-                            t.lock(clientId);
-                        } else {
-                            // Tuple exists but can't be locked, we must reject this request
-                            return new ArrayList<>();
-                        }
-                    }
-                }
-            }
-            if (!found) {
+        try {
+            // wait for turn
+            while (this.seqCounter < seqNumber) {
                 try {
-                    wait();
+                    condSeq.await();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
+
+            // increment seqCounter
+            this.seqCounter++;
+
+            // actual put
+            tuples.add(tuple);
+            debugMessage("Add tuple: " + tuple);
+
+            // notify waiting take specifically
+            if (!notifyTake(tuple))
+                condSeq.signalAll();
+            ;
+        } finally {
+            this.lock.unlock();
         }
-        return stuples;
     }
 
-    public synchronized void takePhase1Release(int clientId) {
-        debugMessage("Take Phase 1 Release. clientId: " + clientId);
-        releaseAll(clientId);
+    public boolean notifyTake(String tuple) {
+        for (Tuple t : this.waitingTuples) {
+            if (tuple.matches(t.getPattern())) {
+                t.setTuple(tuple);
+                t.getCond().signal();
+                return true;
+            }
+        }
+        return false;
     }
 
-    public synchronized void takePhase2(String tuple, int clientId) {
-        debugMessage("Take Phase 2. Tuple: " + tuple + ", clientId: " + clientId);
-        removeTuple(tuple, clientId);
-        releaseAll(clientId);
+    public String read(String pattern) {
+        this.lock.lock();
+        try {
+            String tuple = getMatchingTuple(pattern);
+            return tuple == null ? "" : tuple;
+        } finally {
+            this.lock.unlock();
+        }
     }
 
-    public synchronized List<String> getTupleSpacesState() {
-        return getAllTuples();
+    public String take(String pattern, int seqNumber) {
+        this.lock.lock();
+
+        try {
+            // wait for turn
+            while (this.seqCounter < seqNumber) {
+                try {
+                    condSeq.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            // increment seqCounter
+            this.seqCounter++;
+
+            // actual take
+            String tuple = getMatchingTuple(pattern);
+            if (tuple == null) {
+                Tuple wTuple = new Tuple(pattern, this.lock);
+                waitingTuples.add(wTuple);
+                condSeq.signalAll();
+                while (tuple == null) {
+                    try {
+                        wTuple.getCond().await();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    tuple = wTuple.getTuple();
+                }
+                waitingTuples.remove(wTuple);
+            } else {
+                tuples.remove(tuple);
+                debugMessage("Take tuple: " + tuple);
+            }
+
+            // notify next inline
+            condSeq.signalAll();
+
+            return tuple;
+        } finally {
+            this.lock.unlock();
+        }
+    }
+
+    public List<String> getTupleSpacesState() {
+        return new ArrayList<>(this.tuples);
     }
 
     private String getMatchingTuple(String pattern) {
-        for (Tuple tuple : this.tuples) {
+        for (String tuple : this.tuples) {
             if (tuple.matches(pattern)) {
                 debugMessage("Found tuple: " + tuple);
-                return tuple.getTuple();
+                return tuple;
             }
         }
         debugMessage("Pattern %s not found", pattern);
         return null;
     }
 
-    public void removeTuple(String tuple, int clientId) {
-        for (Tuple t : tuples) {
-            if (t.getTuple().equals(tuple) && t.getClientId() == clientId) {
-                tuples.remove(t);
-                break;
-            }
-        }
+    public void removeTuple(String tuple) {
+        this.tuples.remove(tuple);
     }
 
-    public void releaseAll(int clientId) {
-        for (Tuple t : tuples) {
-            if (t.getClientId() == clientId)
-                t.unlock();
-        }
-    }
-
-    public List<String> getAllTuples() {
-        List<String> stuples = new ArrayList<>();
-        for (Tuple t : tuples) {
-            stuples.add(t.getTuple());
-        }
-        return stuples;
-    }
 }
