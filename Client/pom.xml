@@ -23,7 +23,7 @@
         <mainclass>pt.ulisboa.tecnico.tuplespaces.client.ClientMain</mainclass>
         <server.host>localhost</server.host>
         <server.port>5001</server.port>
-        <server.id>0</server.id>
+        <sequencer.port>8080</sequencer.port>
 
     </properties>
 
@@ -72,7 +72,7 @@
                     <arguments>
                         <argument>${server.host}</argument>
                         <argument>${server.port}</argument>
-                        <argument>${server.id}</argument>
+                        <argument>${sequencer.port}</argument>
                     </arguments>
                 </configuration>
             </plugin>
