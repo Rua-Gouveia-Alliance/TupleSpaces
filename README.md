@@ -111,7 +111,7 @@ mvn clean compile
 mvn exec:java -Dexec.args="<port> <qualifier> [-debug]"
 ```
 
-In the Client directory (Seq stands for Sequencer):
+In the Client directory (NS stands for Name Server, Seq stands for Sequencer):
 
 ```s
 mvn clean compile
