@@ -46,7 +46,7 @@ for TEST in $TESTS; do
 
     echo "${GREEN} Running test ${TESTNUM}.${RES}"
 
-    mvn --quiet compile exec:java -Dexec.args="localhost 5001 0" < "$CONCURRENT" &
-    mvn --quiet compile exec:java -Dexec.args="localhost 5001 1 -debug" < "$TEST"
+    mvn --quiet compile exec:java -Dexec.args="localhost 5001 8080" < "$CONCURRENT" &
+    mvn --quiet compile exec:java -Dexec.args="localhost 5001 8080 -debug" < "$TEST"
 
 done
