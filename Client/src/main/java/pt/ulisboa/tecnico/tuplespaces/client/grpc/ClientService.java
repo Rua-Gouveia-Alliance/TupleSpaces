@@ -65,8 +65,7 @@ public class ClientService {
         for (Integer id : delayer)
             stubs.get(id).put(request, new TupleSpacesObserver<>(collector));
 
-        collector.waitForAll();
-        return collector.getResponses().get(0);
+        return collector.waitForResponse();
     }
 
     public String read(String pattern) {
@@ -77,8 +76,7 @@ public class ClientService {
         for (Integer id : delayer)
             stubs.get(id).read(request, new TupleSpacesObserver<>(collector));
 
-        collector.waitForFirst();
-        return collector.getResponses().get(0).getResult();
+        return collector.waitForResponse().getResult();
     }
 
     public String take(String pattern) {
@@ -90,8 +88,7 @@ public class ClientService {
         for (Integer id : delayer)
             stubs.get(id).take(request, new TupleSpacesObserver<>(collector));
 
-        collector.waitForFirst();
-        return collector.getResponses().get(0).getResult();
+        return collector.waitForResponse().getResult();
     }
 
     public int getSeqNumber() {
@@ -100,8 +97,7 @@ public class ClientService {
         GetSeqNumberRequest request = GetSeqNumberRequest.getDefaultInstance();
         seqStub.getSeqNumber(request, new TupleSpacesObserver<>(collector));
 
-        collector.waitForFirst();
-        return collector.getResponses().get(0).getSeqNumber();
+        return collector.waitForResponse().getSeqNumber();
     }
 
     public String getIntersection(List<String> list) {
@@ -120,8 +116,7 @@ public class ClientService {
 
         stub.getTupleSpacesState(request, observer);
 
-        collector.waitForFirst();
-        return collector.getResponses().get(0);
+        return collector.waitForResponse();
     }
 
     public void exit() {
